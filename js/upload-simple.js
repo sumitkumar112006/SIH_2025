@@ -1,55 +1,13 @@
 // KMRL Document Management System - Upload JavaScript
 
-// Import modules with error handling
-let MetadataExtractor, DocumentConnectors;
-
-// Load modules asynchronously
-async function loadModules() {
-    try {
-        const metadataModule = await import('./metadata-extractor.js');
-        const connectorsModule = await import('./connectors.js');
-        MetadataExtractor = metadataModule.MetadataExtractor;
-        DocumentConnectors = connectorsModule.DocumentConnectors;
-    } catch (error) {
-        console.warn('Error loading modules:', error);
-        // Create fallback objects if modules fail to load
-        MetadataExtractor = {
-            extract: async (file) => ({
-                title: file.name.substring(0, file.name.lastIndexOf('.')) || file.name,
-                date: new Date(file.lastModified).toISOString().split('T')[0],
-                department: '',
-                tags: []
-            })
-        };
-        DocumentConnectors = class {
-            constructor() {
-                this.connectors = {};
-            }
-            async ingestDocuments() {
-                return [];
-            }
-        };
-    }
-}
-
 class UploadManager {
     constructor() {
         this.uploadedFiles = [];
         this.fileMetadata = new Map();
-        this.connectors = null;
         this.init();
     }
 
-    async init() {
-        // Load modules first
-        await loadModules();
-
-        // Initialize connectors
-        if (DocumentConnectors) {
-            this.connectors = new DocumentConnectors();
-        }
-
-        // Get current user and setup UI
+    init() {
         this.currentUser = this.getCurrentUser();
         this.setupDropZone();
         this.setupEventListeners();
@@ -139,8 +97,8 @@ class UploadManager {
         this.uploadedFiles = validFiles;
         this.showUploadProgress();
 
-        // Extract metadata from files
-        await this.extractMetadata();
+        // Extract basic metadata from files
+        await this.extractBasicMetadata();
 
         this.simulateUpload();
     }
@@ -223,6 +181,53 @@ class UploadManager {
         this.showDocumentForm();
     }
 
+    async extractBasicMetadata() {
+        for (const file of this.uploadedFiles) {
+            // Extract basic metadata from file properties
+            const metadata = {
+                title: this.extractTitleFromFilename(file.name),
+                date: new Date(file.lastModified).toISOString().split('T')[0],
+                department: this.detectDepartmentFromFilename(file.name),
+                tags: this.extractTagsFromFilename(file.name)
+            };
+
+            this.fileMetadata.set(file.name, metadata);
+        }
+    }
+
+    extractTitleFromFilename(filename) {
+        // Remove extension and format title
+        const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
+        return nameWithoutExt
+            .replace(/[-_]/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    detectDepartmentFromFilename(filename) {
+        const lowerName = filename.toLowerCase();
+        if (lowerName.includes('engineering') || lowerName.includes('technical')) return 'Engineering';
+        if (lowerName.includes('hr') || lowerName.includes('human')) return 'HR';
+        if (lowerName.includes('finance') || lowerName.includes('financial')) return 'Finance';
+        if (lowerName.includes('operations') || lowerName.includes('maintenance')) return 'Operations';
+        if (lowerName.includes('legal') || lowerName.includes('compliance')) return 'Legal';
+        return '';
+    }
+
+    extractTagsFromFilename(filename) {
+        const lowerName = filename.toLowerCase();
+        const tags = [];
+
+        if (lowerName.includes('report')) tags.push('report');
+        if (lowerName.includes('policy')) tags.push('policy');
+        if (lowerName.includes('safety')) tags.push('safety');
+        if (lowerName.includes('maintenance')) tags.push('maintenance');
+        if (lowerName.includes('financial')) tags.push('financial');
+        if (lowerName.includes('schedule')) tags.push('schedule');
+        if (lowerName.includes('compliance')) tags.push('compliance');
+
+        return tags;
+    }
+
     showDocumentForm() {
         const uploadForm = document.getElementById('uploadForm');
         if (uploadForm) {
@@ -235,8 +240,7 @@ class UploadManager {
                 const metadata = this.fileMetadata.get(file.name);
 
                 if (titleInput && metadata) {
-                    // Use extracted title if available, otherwise use filename
-                    titleInput.value = metadata.title || file.name.substring(0, file.name.lastIndexOf('.'));
+                    titleInput.value = metadata.title;
                 }
 
                 // Auto-fill tags if extracted
@@ -249,6 +253,50 @@ class UploadManager {
             // Show metadata extraction summary
             this.showMetadataPreview();
         }
+    }
+
+    showMetadataPreview() {
+        // Create or update metadata preview section
+        let metadataPreview = document.getElementById('metadataPreview');
+
+        if (!metadataPreview) {
+            metadataPreview = document.createElement('div');
+            metadataPreview.id = 'metadataPreview';
+            metadataPreview.className = 'metadata-preview mt-3';
+
+            const uploadForm = document.getElementById('uploadForm');
+            if (uploadForm) {
+                uploadForm.insertBefore(metadataPreview, uploadForm.firstChild);
+            }
+        }
+
+        const summary = this.getMetadataSummary();
+
+        metadataPreview.innerHTML = `
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-search"></i> Auto-Extracted Metadata</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Files Processed:</strong> ${summary.totalFiles}</p>
+                            ${summary.departmentsDetected.length > 0 ?
+                `<p><strong>Departments Detected:</strong> ${summary.departmentsDetected.join(', ')}</p>` : ''}
+                        </div>
+                        <div class="col-md-6">
+                            ${summary.allTags.length > 0 ?
+                `<p><strong>Tags Found:</strong> ${summary.allTags.slice(0, 5).join(', ')}${summary.allTags.length > 5 ? '...' : ''}</p>` : ''}
+                            ${summary.dateRange.earliest ?
+                `<p><strong>Date Range:</strong> ${summary.dateRange.earliest} to ${summary.dateRange.latest}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="alert alert-info alert-sm mb-0">
+                        <small><i class="fas fa-info-circle"></i> Extracted metadata has been used to pre-fill form fields where possible.</small>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     async handleFormSubmit(e) {
@@ -421,26 +469,6 @@ class UploadManager {
         }
     }
 
-    showSuccess(message) {
-        if (window.showNotification) {
-            window.showNotification(message, 'success');
-        }
-    }
-
-    showError(message) {
-        if (window.showNotification) {
-            window.showNotification(message, 'error');
-        }
-    }
-
-    generateId() {
-        return 'doc_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     getMetadataSummary() {
         const summary = {
             totalFiles: this.uploadedFiles.length,
@@ -469,192 +497,133 @@ class UploadManager {
         return summary;
     }
 
+    showSuccess(message) {
+        if (window.showNotification) {
+            window.showNotification(message, 'success');
+        } else {
+            alert(message);
+        }
+    }
+
+    showError(message) {
+        if (window.showNotification) {
+            window.showNotification(message, 'error');
+        } else {
+            alert(message);
+        }
+    }
+
+    generateId() {
+        return 'doc_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Connector test functionality (simplified)
     async testConnector(connectorType) {
         try {
             // Show loading state
             const button = document.querySelector(`button[onclick="testConnector('${connectorType}')"]`);
-            const originalContent = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
-            button.disabled = true;
-
-            // Simulate connector sync
-            const documents = await this.connectors.ingestDocuments(connectorType);
-
-            // Process ingested documents
-            for (const doc of documents) {
-                await this.processConnectorDocument(doc);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+                button.disabled = true;
             }
 
-            // Show success notification
-            this.showSuccess(`Successfully ingested ${documents.length} document(s) from ${connectorType}`);
+            // Simulate connector sync
+            await this.delay(2000);
 
-            // Update connector status
-            this.updateConnectorStatus(connectorType);
+            // Create a sample document from connector
+            const sampleDoc = this.createSampleConnectorDocument(connectorType);
+            this.saveConnectorDocument(sampleDoc);
+
+            this.showSuccess(`Successfully synced 1 document from ${connectorType}`);
 
         } catch (error) {
             console.error(`Error syncing ${connectorType}:`, error);
-            this.showError(`Failed to sync ${connectorType}: ${error.message}`);
+            this.showError(`Failed to sync ${connectorType}`);
         } finally {
             // Restore button state
             const button = document.querySelector(`button[onclick="testConnector('${connectorType}')"]`);
-            button.innerHTML = '<i class="fas fa-sync"></i> Sync';
-            button.disabled = false;
+            if (button) {
+                button.innerHTML = '<i class="fas fa-sync"></i> Sync';
+                button.disabled = false;
+            }
         }
     }
 
-    async processConnectorDocument(doc) {
-        // Create a simulated document entry
+    createSampleConnectorDocument(connectorType) {
+        const sampleDocs = {
+            email: {
+                id: 'email_001',
+                title: 'Track Inspection Report - Email',
+                category: 'technical',
+                description: 'Document ingested from email connector',
+                tags: ['email', 'track inspection', 'maintenance'],
+                source: 'email'
+            },
+            sharepoint: {
+                id: 'sp_001',
+                title: 'Metro Extension Design - SharePoint',
+                category: 'technical',
+                description: 'Document ingested from SharePoint connector',
+                tags: ['sharepoint', 'design', 'metro extension'],
+                source: 'sharepoint'
+            },
+            maximo: {
+                id: 'maximo_001',
+                title: 'Escalator Maintenance WO - Maximo',
+                category: 'operations',
+                description: 'Document ingested from Maximo connector',
+                tags: ['maximo', 'maintenance', 'escalator'],
+                source: 'maximo'
+            },
+            whatsapp: {
+                id: 'whatsapp_001',
+                title: 'Emergency Response Chat - WhatsApp',
+                category: 'operations',
+                description: 'Document ingested from WhatsApp connector',
+                tags: ['whatsapp', 'emergency', 'incident'],
+                source: 'whatsapp'
+            }
+        };
+
+        return sampleDocs[connectorType] || sampleDocs.email;
+    }
+
+    saveConnectorDocument(doc) {
         const existingDocs = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
 
         const newDoc = {
-            id: doc.id,
-            title: doc.title,
-            category: this.mapDepartmentToCategory(doc.department),
-            description: `Document ingested from ${doc.source}`,
-            tags: doc.tags || [],
+            ...doc,
             accessLevel: 'internal',
             files: [{
                 name: `${doc.title}.txt`,
-                size: 1024, // Simulated size
+                size: 1024,
                 type: 'text/plain',
-                lastModified: new Date(doc.date).getTime(),
-                storagePath: doc.filePath,
-                metadata: {
-                    extractedTitle: doc.title,
-                    extractedDate: doc.date,
-                    extractedDepartment: doc.department,
-                    extractedTags: doc.tags || []
-                }
+                lastModified: Date.now(),
+                storagePath: `assets/${doc.source}_sample.txt`
             }],
             uploadedBy: `${doc.source} Connector`,
             uploadedAt: new Date().toISOString(),
-            status: 'approved', // Auto-approve connector documents
+            status: 'approved',
             downloads: 0,
-            views: 0,
-            source: doc.source,
-            connectorData: doc
+            views: 0
         };
 
-        // Check if document already exists
-        const existingIndex = existingDocs.findIndex(existing => existing.id === doc.id);
-        if (existingIndex !== -1) {
-            // Update existing document
-            existingDocs[existingIndex] = newDoc;
-        } else {
-            // Add new document
-            existingDocs.push(newDoc);
-        }
-
-        // Save to localStorage
+        existingDocs.push(newDoc);
         localStorage.setItem('kmrl_documents', JSON.stringify(existingDocs));
-    }
-
-    mapDepartmentToCategory(department) {
-        const mapping = {
-            'Engineering': 'technical',
-            'HR': 'hr',
-            'Finance': 'financial',
-            'Operations': 'operations',
-            'Legal': 'legal'
-        };
-        return mapping[department] || 'technical';
-    }
-
-    updateConnectorStatus(connectorType) {
-        // Update the connector card to show last sync time
-        const now = new Date().toLocaleTimeString();
-        const card = document.querySelector(`button[onclick="testConnector('${connectorType}')"]`).closest('.card');
-        const statusText = card.querySelector('.small');
-        if (statusText) {
-            statusText.innerHTML = `Last sync: ${now}`;
-        }
-    }
-
-    showMetadataPreview() {
-        // Create or update metadata preview section
-        let metadataPreview = document.getElementById('metadataPreview');
-
-        if (!metadataPreview) {
-            metadataPreview = document.createElement('div');
-            metadataPreview.id = 'metadataPreview';
-            metadataPreview.className = 'metadata-preview mt-3';
-
-            const uploadForm = document.getElementById('uploadForm');
-            if (uploadForm) {
-                uploadForm.insertBefore(metadataPreview, uploadForm.firstChild);
-            }
-        }
-
-        const summary = this.getMetadataSummary();
-
-        metadataPreview.innerHTML = `
-            <div class="card border-info">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0"><i class="fas fa-search"></i> Auto-Extracted Metadata</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Files Processed:</strong> ${summary.totalFiles}</p>
-                            ${summary.departmentsDetected.length > 0 ?
-                `<p><strong>Departments Detected:</strong> ${summary.departmentsDetected.join(', ')}</p>` : ''}
-                        </div>
-                        <div class="col-md-6">
-                            ${summary.allTags.length > 0 ?
-                `<p><strong>Tags Found:</strong> ${summary.allTags.slice(0, 5).join(', ')}${summary.allTags.length > 5 ? '...' : ''}</p>` : ''}
-                            ${summary.dateRange.earliest ?
-                `<p><strong>Date Range:</strong> ${summary.dateRange.earliest} to ${summary.dateRange.latest}</p>` : ''}
-                        </div>
-                    </div>
-                    <div class="alert alert-info alert-sm mb-0">
-                        <small><i class="fas fa-info-circle"></i> Extracted metadata has been used to pre-fill form fields where possible.</small>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    async extractMetadata() {
-        if (!MetadataExtractor) {
-            console.warn('MetadataExtractor not available, using basic metadata');
-            // Use basic metadata extraction
-            for (const file of this.uploadedFiles) {
-                this.fileMetadata.set(file.name, {
-                    title: file.name.substring(0, file.name.lastIndexOf('.')) || file.name,
-                    date: new Date(file.lastModified).toISOString().split('T')[0],
-                    department: '',
-                    tags: []
-                });
-            }
-            return;
-        }
-
-        for (const file of this.uploadedFiles) {
-            try {
-                const metadata = await MetadataExtractor.extract(file);
-                this.fileMetadata.set(file.name, metadata);
-            } catch (error) {
-                console.error(`Error extracting metadata for ${file.name}:`, error);
-                // Set default metadata if extraction fails
-                this.fileMetadata.set(file.name, {
-                    title: file.name.substring(0, file.name.lastIndexOf('.')),
-                    date: new Date(file.lastModified).toISOString().split('T')[0],
-                    department: '',
-                    tags: []
-                });
-            }
-        }
     }
 }
 
-// Global function for reset
+// Global functions
 function resetUpload() {
     if (window.uploadManager) {
         window.uploadManager.resetUpload();
     }
 }
 
-// Global function for connector testing
 function testConnector(connectorType) {
     if (window.uploadManager) {
         window.uploadManager.testConnector(connectorType);

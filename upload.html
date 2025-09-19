@@ -196,12 +196,75 @@
         <main class="main-content">
             <div class="upload-container">
                 <div class="content-header">
-                    <h1><i class="fas fa-cloud-upload-alt"></i> Upload Documents</h1>
-                    <p>Drag and drop files or click to browse</p>
+                    <h1><i class="fas fa-cloud-upload-alt"></i> Document Ingestion Module</h1>
+                    <p>Upload documents manually or use automated connectors</p>
                 </div>
 
-                <!-- Upload Area -->
+                <!-- Connector Status Section -->
                 <div class="upload-card">
+                    <h3><i class="fas fa-plug"></i> Document Connectors</h3>
+                    <p class="text-muted">Automated document ingestion from various sources</p>
+
+                    <div class="row" id="connectorStatus">
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-primary h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                    <h6>Email</h6>
+                                    <span class="badge bg-success">Active</span>
+                                    <p class="small mt-2 mb-0">23 documents</p>
+                                    <button class="btn btn-primary btn-sm mt-2" onclick="testConnector('email')">
+                                        <i class="fas fa-sync"></i> Sync
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-info h-100">
+                                <div class="card-body text-center">
+                                    <i class="fab fa-microsoft fa-2x text-info mb-2"></i>
+                                    <h6>SharePoint</h6>
+                                    <span class="badge bg-success">Active</span>
+                                    <p class="small mt-2 mb-0">156 documents</p>
+                                    <button class="btn btn-info btn-sm mt-2" onclick="testConnector('sharepoint')">
+                                        <i class="fas fa-sync"></i> Sync
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-warning h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tools fa-2x text-warning mb-2"></i>
+                                    <h6>Maximo</h6>
+                                    <span class="badge bg-success">Active</span>
+                                    <p class="small mt-2 mb-0">89 work orders</p>
+                                    <button class="btn btn-warning btn-sm mt-2" onclick="testConnector('maximo')">
+                                        <i class="fas fa-sync"></i> Sync
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-success h-100">
+                                <div class="card-body text-center">
+                                    <i class="fab fa-whatsapp fa-2x text-success mb-2"></i>
+                                    <h6>WhatsApp</h6>
+                                    <span class="badge bg-success">Active</span>
+                                    <p class="small mt-2 mb-0">342 messages</p>
+                                    <button class="btn btn-success btn-sm mt-2" onclick="testConnector('whatsapp')">
+                                        <i class="fas fa-sync"></i> Sync
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Upload Area -->
+                <div class="upload-card">
+                    <h3><i class="fas fa-upload"></i> Manual Document Upload</h3>
+                    <p class="text-muted mb-3">Upload documents directly from your device</p>
                     <div class="drop-zone" id="dropZone">
                         <div class="drop-zone-icon">
                             <i class="fas fa-cloud-upload-alt"></i>
@@ -279,7 +342,7 @@
     </div>
 
     <script src="js/common.js"></script>
-    <script src="js/upload.js"></script>
+    <script src="js/upload-simple.js"></script>
 </body>
 
 </html>
