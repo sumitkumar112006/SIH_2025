@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMRL Document Management - Upload Document</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-train text-primary"></i>
+                    <h2>KMRL DMS</h2>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="upload.html" class="nav-item active">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload Document
+                </a>
+                <a href="documents.html" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    Documents
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </a>
+
+                <div class="nav-section admin-only">
+                    <div class="nav-section-title">Administration</div>
+                    <a href="admin.html" class="nav-item">
+                        <i class="fas fa-users-cog"></i>
+                        User Management
+                    </a>
+                    <a href="settings.html" class="nav-item">
+                        <i class="fas fa-cog"></i>
+                        System Settings
+                    </a>
+                </div>
+
+                <div class="nav-section manager-only">
+                    <div class="nav-section-title">Management</div>
+                    <a href="approvals.html" class="nav-item">
+                        <i class="fas fa-check-circle"></i>
+                        Approvals
+                    </a>
+                    <a href="reports.html" class="nav-item">
+                        <i class="fas fa-file-contract"></i>
+                        Reports
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Support</div>
+                    <a href="#" class="nav-item" id="chatbotToggle">
+                        <i class="fas fa-comments"></i>
+                        Help & Support
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-toggle" id="mobileToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="header-title">Upload Document</h1>
+                </div>
+
+                <div class="header-right">
+                    <!-- Notifications -->
+                    <div class="notification-dropdown">
+                        <button class="notification-btn" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notificationBadge">0</span>
+                        </button>
+                        <div class="notification-panel" id="notificationPanel">
+                            <div class="notification-header">
+                                <h3>Notifications</h3>
+                                <button class="mark-all-read" id="markAllRead">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notificationList"></div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="user-dropdown">
+                        <button class="user-btn" id="userBtn">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name" id="userName">Loading...</span>
+                                <span class="user-role" id="userRole">-</span>
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-menu" id="userMenu">
+                            <a href="profile.html" class="menu-item">
+                                <i class="fas fa-user-circle"></i>
+                                Profile Settings
+                            </a>
+                            <a href="preferences.html" class="menu-item">
+                                <i class="fas fa-cog"></i>
+                                Preferences
+                            </a>
+                            <a href="#" class="menu-item" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Upload Content -->
+            <div class="upload-content">
+                <!-- Upload Form -->
+                <div class="upload-container">
+                    <div class="upload-header">
+                        <h2><i class="fas fa-cloud-upload-alt"></i> Upload New Document</h2>
+                        <p>Upload documents for review and approval by your department manager</p>
+                    </div>
+
+                    <form id="uploadForm" class="upload-form">
+                        <!-- File Upload Area -->
+                        <div class="upload-section">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-file"></i>
+                                    Select or Drop Files
+                                </label>
+
+                                <!-- Drag and Drop Area -->
+                                <div class="drop-zone" id="dropZone">
+                                    <div class="drop-zone-content">
+                                        <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                                        <h3>Drag & Drop Files Here</h3>
+                                        <p>or <button type="button" class="browse-btn" id="browseBtn">Browse
+                                                Files</button></p>
+                                        <div class="file-types">
+                                            <small>Supported formats: PDF, DOCX, XLSX, PNG, JPG (Max: 10MB)</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden File Input -->
+                                    <input type="file" id="fileInput" multiple accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
+                                        class="file-input">
+                                </div>
+
+                                <!-- Selected Files List -->
+                                <div class="selected-files" id="selectedFiles"></div>
+                            </div>
+                        </div>
+
+                        <!-- Document Information -->
+                        <div class="upload-section">
+                            <h3><i class="fas fa-info-circle"></i> Document Information</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="documentTitle" class="form-label">Document Title *</label>
+                                    <input type="text" id="documentTitle" name="documentTitle" class="form-control"
+                                        placeholder="Enter document title" required>
+                                    <div class="error-message" id="titleError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="department" class="form-label">Department *</label>
+                                    <select id="department" name="department" class="form-control form-select" required>
+                                        <option value="">Select department</option>
+                                        <option value="operations">Operations</option>
+                                        <option value="engineering">Engineering</option>
+                                        <option value="finance">Finance</option>
+                                        <option value="hr">Human Resources</option>
+                                        <option value="safety">Safety & Security</option>
+                                        <option value="maintenance">Maintenance</option>
+                                        <option value="admin">Administration</option>
+                                    </select>
+                                    <div class="error-message" id="departmentError"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea id="description" name="description" class="form-control" rows="3"
+                                    placeholder="Brief description of the document (optional)"></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="category" class="form-label">Category</label>
+                                    <select id="category" name="category" class="form-control form-select">
+                                        <option value="">Select category</option>
+                                        <option value="policy">Policy Document</option>
+                                        <option value="report">Report</option>
+                                        <option value="manual">Manual/Procedure</option>
+                                        <option value="form">Form/Template</option>
+                                        <option value="certificate">Certificate</option>
+                                        <option value="contract">Contract/Agreement</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="priority" class="form-label">Priority</label>
+                                    <select id="priority" name="priority" class="form-control form-select">
+                                        <option value="normal">Normal</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tags" class="form-label">Tags</label>
+                                <input type="text" id="tags" name="tags" class="form-control"
+                                    placeholder="Enter tags separated by commas (e.g., safety, training, Q4)">
+                                <small class="form-text">Tags help in organizing and searching documents</small>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Options -->
+                        <div class="upload-section">
+                            <div class="section-toggle" id="advancedToggle">
+                                <h3><i class="fas fa-cog"></i> Advanced Options</h3>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+
+                            <div class="advanced-options" id="advancedOptions">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="expiryDate" class="form-label">Expiry Date</label>
+                                        <input type="date" id="expiryDate" name="expiryDate" class="form-control">
+                                        <small class="form-text">Set if document has an expiration date</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="version" class="form-label">Version</label>
+                                        <input type="text" id="version" name="version" class="form-control"
+                                            placeholder="e.g., 1.0, 2.1">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" id="confidential" name="confidential">
+                                            <span class="checkmark"></span>
+                                            Mark as Confidential
+                                        </label>
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" id="autoOCR" name="autoOCR" checked>
+                                            <span class="checkmark"></span>
+                                            Enable OCR Processing (Extract text automatically)
+                                        </label>
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" id="aiSummary" name="aiSummary" checked>
+                                            <span class="checkmark"></span>
+                                            Generate AI Summary
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload Progress -->
+                        <div class="upload-progress-section" id="uploadProgressSection" style="display: none;">
+                            <h3><i class="fas fa-tasks"></i> Upload Progress</h3>
+                            <div class="progress-list" id="progressList"></div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="resetBtn">
+                                <i class="fas fa-undo"></i>
+                                Reset Form
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="saveDraftBtn">
+                                <i class="fas fa-save"></i>
+                                Save as Draft
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="uploadBtn">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span class="btn-text">Upload Documents</span>
+                                <span class="spinner d-none"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Recent Uploads -->
+                <div class="recent-uploads-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fas fa-history"></i> Recent Uploads</h4>
+                            <a href="documents.html?filter=my" class="card-action">View All</a>
+                        </div>
+                        <div class="recent-uploads-list" id="recentUploadsList">
+                            <!-- Recent uploads will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Chatbot Component -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i class="fas fa-robot"></i>
+                KMRL Assistant
+            </div>
+            <button class="chatbot-close" id="chatbotClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <div class="message-content">
+                    Hello! I can help you with document uploads. What do you need assistance with?
+                </div>
+                <div class="message-time">Now</div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" placeholder="Ask about upload process..." id="chatbotInput">
+            <button type="button" id="chatbotSend">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/upload.js"></script>
+</body>
+
+</html>
+
+<style>
+    /* Upload Page Specific Styles */
+    .upload-content {
+        padding: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .upload-container {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .upload-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .upload-header h2 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-header p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .upload-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .upload-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .upload-section h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Drag and Drop Styles */
+    .drop-zone {
+        border: 2px dashed var(--medium-gray);
+        border-radius: var(--border-radius);
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        background: var(--light-gray);
+        cursor: pointer;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+        border-color: var(--primary-blue);
+        background: var(--light-blue);
+    }
+
+    .drop-zone.drag-over {
+        transform: scale(1.02);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .drop-icon {
+        font-size: 3rem;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+
+    .drop-zone h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .drop-zone p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .browse-btn {
+        background: none;
+        border: none;
+        color: var(--primary-blue);
+        text-decoration: underline;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .browse-btn:hover {
+        color: var(--dark-blue);
+    }
+
+    .file-types {
+        margin-top: 1rem;
+    }
+
+    .file-types small {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+    }
+
+    .file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    /* Selected Files */
+    .selected-files {
+        margin-top: 1rem;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: var(--white);
+        border: 1px solid var(--medium-gray);
+        border-radius: var(--border-radius);
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .file-item:hover {
+        box-shadow: var(--shadow);
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+
+    .file-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1rem;
+    }
+
+    .file-icon.pdf {
+        background: var(--danger);
+    }
+
+    .file-icon.docx {
+        background: var(--primary-blue);
+    }
+
+    .file-icon.xlsx {
+        background: var(--success);
+    }
+
+    .file-icon.image {
+        background: var(--warning);
+    }
+
+    .file-icon.default {
+        background: var(--dark-gray);
+    }
+
+    .file-details {
+        flex: 1;
+    }
+
+    .file-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .file-meta {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .file-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .file-remove {
+        background: var(--danger);
+        color: var(--white);
+        border: none;
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .file-remove:hover {
+        background: #dc2626;
+    }
+
+    /* Form Layout */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .checkbox-container input {
+        margin-right: 0.75rem;
+    }
+
+    .form-text {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    /* Advanced Options */
+    .section-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        margin-bottom: 1rem;
+    }
+
+    .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .section-toggle.active .toggle-icon {
+        transform: rotate(180deg);
+    }
+
+    .advanced-options {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .advanced-options.show {
+        max-height: 500px;
+    }
+
+    /* Upload Progress */
+    .upload-progress-section {
+        background: var(--light-gray);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: var(--white);
+        border-radius: var(--border-radius);
+        margin-bottom: 0.75rem;
+        box-shadow: var(--shadow);
+    }
+
+    .progress-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .progress-info {
+        flex: 1;
+        margin-right: 1rem;
+    }
+
+    .progress-name {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--medium-gray);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--primary-blue);
+        transition: width 0.3s ease;
+    }
+
+    .progress-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .progress-percentage {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--medium-gray);
+    }
+
+    .form-actions .btn {
+        min-width: 140px;
+    }
+
+    /* Recent Uploads */
+    .recent-uploads-section {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+    }
+
+    .recent-uploads-list {
+        padding: 1rem;
+    }
+
+    .recent-upload-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--medium-gray);
+        transition: background-color 0.2s ease;
+    }
+
+    .recent-upload-item:last-child {
+        border-bottom: none;
+    }
+
+    .recent-upload-item:hover {
+        background: var(--light-gray);
+    }
+
+    .upload-item-info {
+        flex: 1;
+    }
+
+    .upload-item-title {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .upload-item-meta {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .upload-item-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Loading States */
+    .btn.loading {
+        position: relative;
+    }
+
+    .btn.loading .btn-text {
+        opacity: 0;
+    }
+
+    .btn.loading .spinner {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: block !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .upload-content {
+            padding: 1rem;
+        }
+
+        .upload-container {
+            padding: 1.5rem;
+        }
+
+        .drop-zone {
+            padding: 2rem 1rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+
+        .file-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .file-info {
+            width: 100%;
+        }
+
+        .file-actions {
+            align-self: flex-end;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .drop-zone {
+            padding: 1.5rem 0.5rem;
+        }
+
+        .drop-icon {
+            font-size: 2rem;
+        }
+
+        .upload-section h3 {
+            font-size: 1rem;
+        }
+    }
+</style>

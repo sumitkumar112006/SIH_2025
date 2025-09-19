@@ -1,30 +1,264 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prashiskshan - Internship Platform</title>
-
-    <!-- GitHub Pages SPA redirect script -->
-    <script>
-        (function (l) {
-            if (l.search[1] === '/') {
-                var decoded = l.search.slice(1).split('&').map(function (s) {
-                    return s.replace(/~and~/g, '&')
-                }).join('?');
-                window.history.replaceState(null, null,
-                    l.pathname.slice(0, -1) + decoded + l.hash
-                );
-            }
-        }(window.location))
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMRL Document Management System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div class="welcome-container">
+        <div class="welcome-content">
+            <div class="logo-section">
+                <i class="fas fa-train logo-icon"></i>
+                <h1>KMRL Document Management System</h1>
+                <p>Kochi Metro Rail Limited - Digital Document Management Platform</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Easy Upload</h3>
+                    <p>Drag & drop document upload with OCR processing</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Approval Workflow</h3>
+                    <p>Streamlined approval process with notifications</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Analytics</h3>
+                    <p>Comprehensive reporting and insights</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Secure</h3>
+                    <p>Role-based access with 2FA authentication</p>
+                </div>
+            </div>
+
+            <div class="welcome-actions">
+                <a href="login.html" class="btn btn-primary btn-large">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Access System
+                </a>
+                <button class="btn btn-secondary btn-large" id="demoBtn">
+                    <i class="fas fa-play"></i>
+                    View Demo
+                </button>
+            </div>
+
+            <div class="demo-credentials" id="demoCredentials" style="display: none;">
+                <h4>Demo Credentials:</h4>
+                <div class="credential-grid">
+                    <div class="credential-item">
+                        <strong>Admin:</strong> admin@kmrl.com / admin123
+                    </div>
+                    <div class="credential-item">
+                        <strong>Manager:</strong> manager@kmrl.com / manager123
+                    </div>
+                    <div class="credential-item">
+                        <strong>Staff:</strong> staff@kmrl.com / staff123
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="welcome-bg">
+            <div class="bg-pattern"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('demoBtn').addEventListener('click', () => {
+            const demoCredentials = document.getElementById('demoCredentials');
+            demoCredentials.style.display = demoCredentials.style.display === 'none' ? 'block' : 'none';
+        });
+    </script>
+
+    <style>
+        .welcome-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            position: relative;
+            padding: 2rem;
+        }
+
+        .welcome-content {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-section {
+            margin-bottom: 3rem;
+        }
+
+        .logo-icon {
+            font-size: 4rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .logo-section h1 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .logo-section p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-item {
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            background: var(--light-gray);
+            transition: transform 0.2s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .feature-item i {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .feature-item h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-item p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .demo-credentials {
+            background: var(--light-blue);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .demo-credentials h4 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .credential-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .credential-item {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+        }
+
+        .welcome-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .bg-pattern {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(255, 255, 255, 0.03) 20px,
+                    rgba(255, 255, 255, 0.03) 40px);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(-20px, -20px) rotate(1deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-content {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .logo-section h1 {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .welcome-actions {
+                flex-direction: column;
+            }
+
+            .credential-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </body>
 
 </html>
