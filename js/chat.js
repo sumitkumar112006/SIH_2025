@@ -120,8 +120,10 @@ class ChatManager {
 
     async getAIResponse(message) {
         try {
-            // Using the standard Gemini API endpoint instead of OpenAI compatibility layer
-            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyA-J5og-BemOJDe6AlGTN0k3PYvMQJ7qOQ', {
+            console.log('Sending message to Gemini:', message);
+
+            // Using the latest Gemini API endpoint
+            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyCTPieAB3raewjMv3E_iecoInNkXmVSGKA', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,18 +131,35 @@ class ChatManager {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: message
+                            text: `You are an AI assistant for KMRL (Kochi Metro Rail Limited) Document Management System. Please provide helpful responses about document management, metro operations, and related topics. User question: ${message}`
                         }]
-                    }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 1024,
+                    }
                 })
             });
 
+            console.log('API Response status:', response.status);
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
+                console.error('API Error Details:', errorData);
                 throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
             }
 
             const data = await response.json();
+            console.log('API Response data:', data);
+
+            // Validate response structure
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+                console.error('Invalid response structure:', data);
+                throw new Error('Invalid response structure from Gemini API');
+            }
+
             return data.candidates[0].content.parts[0].text;
         } catch (error) {
             console.error('Gemini API Error:', error);

@@ -112,6 +112,9 @@ class DocumentsManager {
                         <button class="action-btn action-approve" onclick="approveDocument('${doc.id}')">
                             <i class="fas fa-check"></i>
                         </button>` : ''}
+                        <button class="action-btn action-delete" onclick="deleteDocument('${doc.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </td>
             `;
@@ -140,13 +143,151 @@ function applyFilters() {
     window.documentsManager?.applyFilters();
 }
 
-function viewDocument(id) { alert('View document: ' + id); }
-function downloadDocument(id) { alert('Download document: ' + id); }
+function viewDocument(id) {
+    alert('View document: ' + id);
+}
+
+function downloadDocument(id) {
+    alert('Download document: ' + id);
+}
+
 function approveDocument(id) {
-    alert('Approve document: ' + id);
-    window.documentsManager?.applyFilters();
+    try {
+        // Get existing documents
+        const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+        // Find and update the document
+        const docIndex = documents.findIndex(doc => doc.id === id);
+        if (docIndex !== -1) {
+            documents[docIndex].status = 'approved';
+
+            // Save back to localStorage
+            localStorage.setItem('kmrl_documents', JSON.stringify(documents));
+
+            // Show success notification
+            if (window.showNotification) {
+                window.showNotification('Document approved successfully!', 'success');
+            } else {
+                alert('Document approved successfully!');
+            }
+
+            // Refresh the documents list
+            if (window.documentsManager) {
+                window.documentsManager.applyFilters();
+            }
+        } else {
+            throw new Error('Document not found');
+        }
+    } catch (error) {
+        console.error('Error approving document:', error);
+        if (window.showNotification) {
+            window.showNotification('Failed to approve document', 'error');
+        } else {
+            alert('Failed to approve document');
+        }
+    }
+}
+
+function deleteDocument(id) {
+    if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+        try {
+            // Get existing documents
+            const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+            // Filter out the document to delete
+            const updatedDocuments = documents.filter(doc => doc.id !== id);
+
+            // Save back to localStorage
+            localStorage.setItem('kmrl_documents', JSON.stringify(updatedDocuments));
+
+            // Show success notification
+            if (window.showNotification) {
+                window.showNotification('Document deleted successfully!', 'success');
+            } else {
+                alert('Document deleted successfully!');
+            }
+
+            // Refresh the documents list
+            if (window.documentsManager) {
+                window.documentsManager.applyFilters();
+            }
+        } catch (error) {
+            console.error('Error deleting document:', error);
+            if (window.showNotification) {
+                window.showNotification('Failed to delete document', 'error');
+            } else {
+                alert('Failed to delete document');
+            }
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     window.documentsManager = new DocumentsManager();
+
+    // Add sample documents if none exist
+    const existingDocs = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+    if (existingDocs.length === 0) {
+        const sampleDocs = [
+            {
+                id: 'sample_001',
+                title: 'Engineering Safety Report 2024',
+                category: 'technical',
+                description: 'Annual safety report for engineering operations',
+                tags: ['safety', 'engineering', 'annual'],
+                accessLevel: 'internal',
+                files: [{
+                    name: 'Engineering_Safety_Report_2024.txt',
+                    size: 15420,
+                    type: 'text/plain',
+                    lastModified: Date.now()
+                }],
+                uploadedBy: 'John Doe',
+                uploadedAt: new Date().toISOString(),
+                status: 'pending',
+                downloads: 0,
+                views: 0
+            },
+            {
+                id: 'sample_002',
+                title: 'HR Policy Manual 2024',
+                category: 'hr',
+                description: 'Updated HR policies and procedures',
+                tags: ['hr', 'policy', 'manual'],
+                accessLevel: 'internal',
+                files: [{
+                    name: 'HR_Policy_Manual_2024.txt',
+                    size: 28450,
+                    type: 'text/plain',
+                    lastModified: Date.now() - 86400000
+                }],
+                uploadedBy: 'Jane Smith',
+                uploadedAt: new Date(Date.now() - 86400000).toISOString(),
+                status: 'approved',
+                downloads: 5,
+                views: 12
+            },
+            {
+                id: 'sample_003',
+                title: 'Financial Quarter Report Q3',
+                category: 'financial',
+                description: 'Q3 financial performance analysis',
+                tags: ['financial', 'quarterly', 'report'],
+                accessLevel: 'confidential',
+                files: [{
+                    name: 'Finance_Q3_2024_Report.txt',
+                    size: 42350,
+                    type: 'text/plain',
+                    lastModified: Date.now() - 172800000
+                }],
+                uploadedBy: 'Finance Team',
+                uploadedAt: new Date(Date.now() - 172800000).toISOString(),
+                status: 'pending',
+                downloads: 0,
+                views: 3
+            }
+        ];
+
+        localStorage.setItem('kmrl_documents', JSON.stringify(sampleDocs));
+    }
 });
