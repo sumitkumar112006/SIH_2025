@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Dashboard - KMRL Tender & Technology Tracking</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Additional styles for the unified dashboard */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+            color: white;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #374151;
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            color: white;
+            margin: 0;
+            font-size: 1.25rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-header h3 {
+            opacity: 0;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-link:hover {
+            background-color: #374151;
+            color: white;
+        }
+
+        .nav-link.active {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 1rem;
+            text-align: center;
+        }
+
+        .nav-link span {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-link span {
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        /* User Info */
+        .user-info {
+            padding: 1rem;
+            border-top: 1px solid #374151;
+            margin-top: auto;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-details h4 {
+            color: white;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .user-details p {
+            color: #94a3b8;
+            margin: 0;
+            font-size: 0.8rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+            overflow-x: auto;
+        }
+
+        .main-content.expanded {
+            margin-left: -210px;
+        }
+
+        /* Header */
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-header h1 {
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Widgets Grid */
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .widget {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .widget:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .widget-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .widget-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: none;
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #6b7280;
+            transition: all 0.2s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        /* Tender Widget Specific Styles */
+        .tender-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .tender-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tender-item.urgent-priority {
+            border-left: 4px solid #dc2626;
+        }
+
+        .tender-item.high-priority {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .tender-item.medium-priority {
+            border-left: 4px solid #10b981;
+        }
+
+        .tender-info {
+            flex: 1;
+        }
+
+        .tender-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .tender-meta {
+            font-size: 0.8rem;
+            color: #6b7280;
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .tender-deadline {
+            font-size: 0.75rem;
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .tender-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Technology Widget Specific Styles */
+        .tech-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .tech-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tech-item.high-priority {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .tech-item.medium-priority {
+            border-left: 4px solid #10b981;
+        }
+
+        .tech-info {
+            flex: 1;
+        }
+
+        .tech-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .tech-meta {
+            font-size: 0.8rem;
+            color: #6b7280;
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .relevance-score {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .tech-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Project Widget Specific Styles */
+        .project-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .project-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-item.high-priority {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .project-item.medium-priority {
+            border-left: 4px solid #10b981;
+        }
+
+        .project-info {
+            flex: 1;
+        }
+
+        .project-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .project-meta {
+            font-size: 0.8rem;
+            color: #6b7280;
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-progress {
+            font-weight: 500;
+            color: #059669;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2563eb;
+            border-radius: 3px;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Archive Widget Specific Styles */
+        .archive-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .archive-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .archive-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #e0f2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0ea5e9;
+            margin-right: 1rem;
+        }
+
+        .archive-info {
+            flex: 1;
+        }
+
+        .archive-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .archive-meta {
+            font-size: 0.8rem;
+            color: #6b7280;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .archive-type {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .archive-date {
+            color: #6b7280;
+        }
+
+        .archive-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.25rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 1.5rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            padding: 1.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            text-align: center;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-card:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .action-card i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .main-content.expanded {
+                margin-left: 0;
+            }
+
+            .content-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .widgets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            background: #dc2626;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
+            margin-left: 0.5rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .priority-badge.urgent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-badge.high {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-badge.medium {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* No items message */
+        .no-items {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .no-items i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-file-alt"></i> KMRL</h3>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="unified-dashboard.html" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="tender-tracker.html" class="nav-link">
+                    <i class="fas fa-gavel"></i>
+                    <span>Tender Tracker</span>
+                </a>
+                <a href="#" class="nav-link" id="techTrackerNav">
+                    <i class="fas fa-microchip"></i>
+                    <span>Tech Updates</span>
+                </a>
+                <a href="#" class="nav-link" id="projectTrackerNav">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>Project Tracker</span>
+                </a>
+                <a href="#" class="nav-link" id="archiveNav">
+                    <i class="fas fa-archive"></i>
+                    <span>Archive</span>
+                </a>
+                <a href="upload.html" class="nav-link">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Upload Documents</span>
+                </a>
+                <a href="documents.html" class="nav-link">
+                    <i class="fas fa-folder"></i>
+                    <span>My Documents</span>
+                </a>
+                <a href="#" class="nav-link" id="aiSummarizerLink">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Summarizer</span>
+                </a>
+                <a href="analytics.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="manager.html" class="nav-link manager-only">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Manager Panel</span>
+                </a>
+                <a href="admin.html" class="nav-link admin-only">
+                    <i class="fas fa-cog"></i>
+                    <span>Admin Panel</span>
+                </a>
+            </nav>
+
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h4 class="user-name">Loading...</h4>
+                    <p class="user-role">Loading...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="content-header">
+                <div>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Tender & Technology Dashboard</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <button class="btn btn-danger" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #dbeafe; color: #2563eb;">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <div class="stat-value" id="activeTenders">0</div>
+                    <div class="stat-label">Active Tenders</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #dcfce7; color: #059669;">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="stat-value" id="newTechUpdates">0</div>
+                    <div class="stat-label">Tech Updates</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #fef3c7; color: #d97706;">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="stat-value" id="activeProjects">0</div>
+                    <div class="stat-label">Active Projects</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #f3e8ff; color: #7c3aed;">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="stat-value" id="archivedItems">0</div>
+                    <div class="stat-label">Archived Items</div>
+                </div>
+            </div>
+
+            <!-- Widgets Grid -->
+            <div class="widgets-grid">
+                <!-- Tender Tracker Widget -->
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title"><i class="fas fa-gavel"></i> Tender Tracker</h3>
+                        <div class="widget-actions">
+                            <button class="btn-icon" id="refreshTenders" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="btn-icon" id="openTenderManager" title="Manage">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="widget-content">
+                        <div class="tender-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="urgentTendersCount">0</div>
+                                <div class="stat-label">Urgent</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="newTendersCount">0</div>
+                                <div class="stat-label">New Today</div>
+                            </div>
+                        </div>
+                        <div class="recent-tenders" id="recentTendersList">
+                            <div class="no-items">
+                                <i class="fas fa-gavel"></i>
+                                <p>No tenders found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technology Updates Widget -->
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title"><i class="fas fa-microchip"></i> Technology Updates</h3>
+                        <div class="widget-actions">
+                            <button class="btn-icon" id="refreshTech" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="btn-icon" id="openTechManager" title="Manage">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="widget-content">
+                        <div class="tech-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="newTechCount">0</div>
+                                <div class="stat-label">New This Week</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="relevantTechCount">0</div>
+                                <div class="stat-label">Relevant Updates</div>
+                            </div>
+                        </div>
+                        <div class="recent-tech" id="recentTechList">
+                            <div class="no-items">
+                                <i class="fas fa-microchip"></i>
+                                <p>No technology updates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Status Widget -->
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title"><i class="fas fa-project-diagram"></i> Project Status</h3>
+                        <div class="widget-actions">
+                            <button class="btn-icon" id="refreshProjects" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="btn-icon" id="openProjectManager" title="Manage">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="widget-content">
+                        <div class="project-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="pendingApprovalsCount">0</div>
+                                <div class="stat-label">Pending Approvals</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="overdueTasksCount">0</div>
+                                <div class="stat-label">Overdue Tasks</div>
+                            </div>
+                        </div>
+                        <div class="recent-projects" id="recentProjectsList">
+                            <div class="no-items">
+                                <i class="fas fa-project-diagram"></i>
+                                <p>No active projects</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historical Archive Widget -->
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title"><i class="fas fa-archive"></i> Historical Archive</h3>
+                        <div class="widget-actions">
+                            <button class="btn-icon" id="openArchiveManager" title="Manage">
+                                <i class="fas fa-folder-open"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="widget-content">
+                        <div class="archive-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="archivedTendersCount">0</div>
+                                <div class="stat-label">Archived Tenders</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="archivedTechCount">0</div>
+                                <div class="stat-label">Tech Updates</div>
+                            </div>
+                        </div>
+                        <div class="recent-archive" id="recentArchiveList">
+                            <div class="no-items">
+                                <i class="fas fa-archive"></i>
+                                <p>No archived items</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                <div class="actions-grid">
+                    <a href="tender-tracker.html" class="action-card">
+                        <i class="fas fa-gavel"></i>
+                        <div>View Tenders</div>
+                    </a>
+                    <a href="#" class="action-card" id="quickTechUpdates">
+                        <i class="fas fa-microchip"></i>
+                        <div>Tech Updates</div>
+                    </a>
+                    <a href="#" class="action-card" id="quickProjects">
+                        <i class="fas fa-project-diagram"></i>
+                        <div>Projects</div>
+                    </a>
+                    <a href="#" class="action-card" id="quickArchive">
+                        <i class="fas fa-archive"></i>
+                        <div>Archive</div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/authorization.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/tender-tracker.js"></script>
+    <script src="js/technology-tracker.js"></script>
+    <script src="js/project-tracker.js"></script>
+    <script src="js/historical-archive.js"></script>
+    <script src="js/dashboard.js"></script>
+
+    <script>
+        // Initialize all tracking systems
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize authorization and user info
+            if (typeof AuthorizationManager !== 'undefined') {
+                const authManager = new AuthorizationManager();
+                authManager.setupRoleBasedView();
+                authManager.updateUserInfo();
+            }
+
+            // Initialize dashboard manager
+            if (typeof DashboardManager !== 'undefined') {
+                window.dashboardManager = new DashboardManager();
+            }
+
+            // Initialize tracking systems
+            if (typeof TenderTracker !== 'undefined') {
+                window.tenderTracker = new TenderTracker();
+            }
+
+            if (typeof TechnologyTracker !== 'undefined') {
+                window.techTracker = new TechnologyTracker();
+            }
+
+            if (typeof ProjectStatusTracker !== 'undefined') {
+                window.projectTracker = new ProjectStatusTracker();
+            }
+
+            if (typeof HistoricalArchive !== 'undefined') {
+                window.archiveSystem = new HistoricalArchive();
+            }
+
+            // Setup event listeners for navigation
+            document.getElementById('techTrackerNav').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.techTracker) {
+                    window.techTracker.openTechModal();
+                }
+            });
+
+            document.getElementById('projectTrackerNav').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.projectTracker) {
+                    window.projectTracker.openProjectModal();
+                }
+            });
+
+            document.getElementById('archiveNav').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.archiveSystem) {
+                    window.archiveSystem.openArchiveModal();
+                }
+            });
+
+            document.getElementById('quickTechUpdates').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.techTracker) {
+                    window.techTracker.openTechModal();
+                }
+            });
+
+            document.getElementById('quickProjects').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.projectTracker) {
+                    window.projectTracker.openProjectModal();
+                }
+            });
+
+            document.getElementById('quickArchive').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.archiveSystem) {
+                    window.archiveSystem.openArchiveModal();
+                }
+            });
+
+            // Setup refresh buttons
+            document.getElementById('refreshTenders').addEventListener('click', function () {
+                if (window.tenderTracker) {
+                    window.tenderTracker.performManualSearch();
+                }
+            });
+
+            document.getElementById('refreshTech').addEventListener('click', function () {
+                if (window.techTracker) {
+                    window.techTracker.performTechScan();
+                }
+            });
+
+            document.getElementById('refreshProjects').addEventListener('click', function () {
+                if (window.projectTracker) {
+                    window.projectTracker.updateProjectWidget();
+                }
+            });
+
+            // Setup management buttons
+            document.getElementById('openTenderManager').addEventListener('click', function () {
+                if (window.tenderTracker) {
+                    window.tenderTracker.openTenderModal();
+                }
+            });
+
+            document.getElementById('openTechManager').addEventListener('click', function () {
+                if (window.techTracker) {
+                    window.techTracker.openTechModal();
+                }
+            });
+
+            document.getElementById('openProjectManager').addEventListener('click', function () {
+                if (window.projectTracker) {
+                    window.projectTracker.openProjectModal();
+                }
+            });
+
+            document.getElementById('openArchiveManager').addEventListener('click', function () {
+                if (window.archiveSystem) {
+                    window.archiveSystem.openArchiveModal();
+                }
+            });
+
+            // Update dashboard stats
+            updateDashboardStats();
+        });
+
+        // Function to update dashboard stats
+        function updateDashboardStats() {
+            // Update tender stats
+            if (window.tenderTracker) {
+                const activeTenders = window.tenderTracker.tenders.filter(t => ['active', 'upcoming'].includes(t.status)).length;
+                const urgentTenders = window.tenderTracker.tenders.filter(t => t.priority === 'urgent').length;
+                const todayTenders = window.tenderTracker.getTodayTenders().length;
+
+                document.getElementById('activeTenders').textContent = activeTenders;
+                document.getElementById('urgentTendersCount').textContent = urgentTenders;
+                document.getElementById('newTendersCount').textContent = todayTenders;
+
+                // Update recent tenders list
+                updateRecentTendersList();
+            }
+
+            // Update technology stats
+            if (window.techTracker) {
+                const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                const newThisWeek = window.techTracker.techUpdates.filter(t =>
+                    new Date(t.discovered) > weekAgo
+                ).length;
+
+                const relevantUpdates = window.techTracker.techUpdates.filter(t =>
+                    t.relevanceScore >= 70
+                ).length;
+
+                document.getElementById('newTechUpdates').textContent = newThisWeek;
+                document.getElementById('newTechCount').textContent = newThisWeek;
+                document.getElementById('relevantTechCount').textContent = relevantUpdates;
+
+                // Update recent tech list
+                updateRecentTechList();
+            }
+
+            // Update project stats
+            if (window.projectTracker) {
+                const activeProjects = window.projectTracker.projects.filter(p => p.status === 'in-progress').length;
+                const pendingApprovals = window.projectTracker.workflows.filter(w => w.status === 'pending').length;
+                const overdueTasks = window.projectTracker.getOverdueTasks().length;
+
+                document.getElementById('activeProjects').textContent = activeProjects;
+                document.getElementById('pendingApprovalsCount').textContent = pendingApprovals;
+                document.getElementById('overdueTasksCount').textContent = overdueTasks;
+
+                // Update recent projects list
+                updateRecentProjectsList();
+            }
+
+            // Update archive stats
+            if (window.archiveSystem) {
+                const archivedTenders = window.archiveSystem.archivedTenders.length;
+                const archivedTech = window.archiveSystem.archivedTechUpdates.length;
+                const archivedProjects = window.archiveSystem.archivedProjects.length;
+                const totalArchived = archivedTenders + archivedTech + archivedProjects;
+
+                document.getElementById('archivedItems').textContent = totalArchived;
+                document.getElementById('archivedTendersCount').textContent = archivedTenders;
+                document.getElementById('archivedTechCount').textContent = archivedTech;
+
+                // Update recent archive list
+                updateRecentArchiveList();
+            }
+        }
+
+        // Function to update recent tenders list
+        function updateRecentTendersList() {
+            const container = document.getElementById('recentTendersList');
+            if (!container || !window.tenderTracker) return;
+
+            const recentTenders = window.tenderTracker.tenders
+                .sort((a, b) => new Date(b.addedDate) - new Date(a.addedDate))
+                .slice(0, 3);
+
+            if (recentTenders.length === 0) {
+                container.innerHTML = `
+                    <div class="no-items">
+                        <i class="fas fa-gavel"></i>
+                        <p>No tenders found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = recentTenders.map(tender => `
+                <div class="tender-item ${tender.priority}-priority">
+                    <div class="tender-info">
+                        <div class="tender-title">${tender.title}</div>
+                        <div class="tender-meta">
+                            <span class="tender-org">${tender.organization}</span>
+                            <span class="tender-value">₹${formatValue(tender.value)}</span>
+                        </div>
+                        <div class="tender-deadline">
+                            Deadline: ${formatDate(tender.submissionDeadline)}
+                        </div>
+                    </div>
+                    <div class="tender-actions">
+                        <button class="btn-icon" onclick="viewTender('${tender.id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Function to update recent tech list
+        function updateRecentTechList() {
+            const container = document.getElementById('recentTechList');
+            if (!container || !window.techTracker) return;
+
+            const recentUpdates = window.techTracker.techUpdates.slice(0, 3);
+
+            if (recentUpdates.length === 0) {
+                container.innerHTML = `
+                    <div class="no-items">
+                        <i class="fas fa-microchip"></i>
+                        <p>No technology updates</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = recentUpdates.map(update => `
+                <div class="tech-item ${update.priority}-priority">
+                    <div class="tech-info">
+                        <div class="tech-title">${update.title}</div>
+                        <div class="tech-meta">
+                            <span class="tech-source">${update.source}</span>
+                            <span class="relevance-score">${update.relevanceScore}% relevant</span>
+                        </div>
+                    </div>
+                    <div class="tech-actions">
+                        <button class="btn-icon" onclick="viewTechUpdate('${update.id}')" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Function to update recent projects list
+        function updateRecentProjectsList() {
+            const container = document.getElementById('recentProjectsList');
+            if (!container || !window.projectTracker) return;
+
+            const activeProjects = window.projectTracker.projects
+                .filter(p => p.status === 'in-progress')
+                .slice(0, 3);
+
+            if (activeProjects.length === 0) {
+                container.innerHTML = `
+                    <div class="no-items">
+                        <i class="fas fa-project-diagram"></i>
+                        <p>No active projects</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = activeProjects.map(project => `
+                <div class="project-item ${project.priority}-priority">
+                    <div class="project-info">
+                        <div class="project-title">${project.name}</div>
+                        <div class="project-meta">
+                            <span class="project-department">${project.department}</span>
+                            <span class="project-progress">${project.progress}% complete</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${project.progress}%"></div>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn-icon" onclick="viewProject('${project.id}')" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Function to update recent archive list
+        function updateRecentArchiveList() {
+            const container = document.getElementById('recentArchiveList');
+            if (!container || !window.archiveSystem) return;
+
+            // Get recent archived items from all categories
+            const allItems = [
+                ...window.archiveSystem.archivedTenders.map(item => ({ ...item, type: 'tender', archivedDate: item.archivedDate || new Date() })),
+                ...window.archiveSystem.archivedTechUpdates.map(item => ({ ...item, type: 'tech', archivedDate: item.archivedDate || new Date() })),
+                ...window.archiveSystem.archivedProjects.map(item => ({ ...item, type: 'project', archivedDate: item.archivedDate || new Date() }))
+            ];
+
+            // Sort by archived date (newest first)
+            allItems.sort((a, b) => new Date(b.archivedDate) - new Date(a.archivedDate));
+
+            const recentItems = allItems.slice(0, 3);
+
+            if (recentItems.length === 0) {
+                container.innerHTML = `
+                    <div class="no-items">
+                        <i class="fas fa-archive"></i>
+                        <p>No archived items</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = recentItems.map(item => `
+                <div class="archive-item">
+                    <div class="archive-icon">
+                        <i class="fas ${getIconForType(item.type)}"></i>
+                    </div>
+                    <div class="archive-info">
+                        <div class="archive-title">${item.title || item.name}</div>
+                        <div class="archive-meta">
+                            <span class="archive-type">${getTypeLabel(item.type)}</span>
+                            <span class="archive-date">${formatDate(item.archivedDate)}</span>
+                        </div>
+                    </div>
+                    <div class="archive-actions">
+                        <button class="btn-icon" onclick="viewArchivedItem('${item.id}', '${item.type}')" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Helper functions
+        function formatValue(value) {
+            if (value >= 10000000) {
+                return (value / 10000000).toFixed(1) + ' Cr';
+            } else if (value >= 100000) {
+                return (value / 100000).toFixed(1) + ' L';
+            } else {
+                return (value / 1000).toFixed(0) + ' K';
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function getIconForType(type) {
+            const iconMap = {
+                tender: 'fa-gavel',
+                tech: 'fa-microchip',
+                project: 'fa-project-diagram'
+            };
+            return iconMap[type] || 'fa-file';
+        }
+
+        function getTypeLabel(type) {
+            const labelMap = {
+                tender: 'Tender',
+                tech: 'Technology',
+                project: 'Project'
+            };
+            return labelMap[type] || 'Item';
+        }
+
+        // View functions
+        function viewTender(tenderId) {
+            if (window.tenderTracker) {
+                window.tenderTracker.viewTender(tenderId);
+            }
+        }
+
+        function viewTechUpdate(updateId) {
+            if (window.techTracker) {
+                window.techTracker.viewTechUpdate(updateId);
+            }
+        }
+
+        function viewProject(projectId) {
+            if (window.projectTracker) {
+                window.projectTracker.viewProject(projectId);
+            }
+        }
+
+        function viewArchivedItem(itemId, type) {
+            if (window.archiveSystem) {
+                window.archiveSystem.viewArchivedItem(itemId, type);
+            }
+        }
+
+        // Periodically update dashboard stats
+        setInterval(updateDashboardStats, 30000); // Update every 30 seconds
+    </script>
+</body>
+
+</html>

@@ -32,6 +32,18 @@ A comprehensive web-based document management system built with HTML, CSS, and J
 - Basic search and filtering
 - View assigned documents
 
+## 🏗️ Enhanced Tender Tracking System
+
+This system has been enhanced with a backend architecture for automated tender tracking and notification capabilities.
+
+### New Features
+- **Automated Portal Monitoring**: Scans government and private tender portals
+- **Real-time Notifications**: WebSocket-based instant alerts
+- **AI Integration**: Tender summarization and categorization
+- **Email Notifications**: SMTP-based email alerts
+- **Data Persistence**: MongoDB database storage
+- **RESTful API**: Backend services for frontend integration
+
 ## 📁 Project Structure
 
 ```
@@ -44,7 +56,10 @@ KMRL2/
 │   ├── dashboard.js            # Dashboard functionality and widgets
 │   ├── upload.js               # File upload handling
 │   ├── documents.js            # Document management
-│   └── analytics.js            # Charts and reporting
+│   ├── api-client.js           # API client for backend communication
+│   └── ...                     # Other JavaScript files
+├── models/                     # Mongoose models for MongoDB
+├── services/                   # Backend services
 ├── images/                     # Static assets directory
 ├── index.html                  # Welcome landing page
 ├── login.html                  # Authentication page
@@ -53,7 +68,9 @@ KMRL2/
 ├── documents.html              # Document management
 ├── analytics.html              # Analytics and reporting
 ├── admin.html                  # Admin panel
-└── README.md                   # This file
+├── server.js                   # Main backend server
+├── README.md                   # This file
+└── README_BACKEND.md           # Backend architecture documentation
 ```
 
 ## 🛠️ Installation & Setup
@@ -63,6 +80,26 @@ KMRL2/
 2. Ensure all files are in the correct directory structure
 3. Open `index.html` in a web browser
 4. Navigate to the login page and use demo credentials
+
+### Backend Setup
+1. Install MongoDB locally or use a cloud service
+2. Install Node.js dependencies:
+   ```bash
+   # On Windows
+   install-backend.bat
+   
+   # On macOS/Linux
+   chmod +x install-backend.sh
+   ./install-backend.sh
+   ```
+3. Configure environment variables in `.env`:
+   - MongoDB connection string
+   - SMTP settings for email notifications
+   - OpenAI API key for AI features
+4. Start the backend server:
+   ```bash
+   npm start
+   ```
 
 ### Local Development Server
 For best experience, serve the files through a local web server:
@@ -122,6 +159,13 @@ The system includes demo accounts for testing:
 3. Configure system settings
 4. Monitor system health and usage
 
+### Tender Tracking (Enhanced Features)
+1. The system automatically monitors tender portals
+2. Real-time notifications appear in the dashboard
+3. Email alerts are sent for high-priority tenders
+4. AI-enhanced tender summaries and categorization
+5. Historical tender data stored in MongoDB
+
 ## 🎨 Design System
 
 ### Brand Colors
@@ -150,15 +194,16 @@ The system includes demo accounts for testing:
 - **Features Used**: ES6+, CSS Grid, Flexbox, Local Storage
 
 ### Dependencies
-- **Chart.js**: Data visualization and analytics
-- **Font Awesome**: Icons and visual elements
-- **No Framework**: Pure HTML, CSS, and JavaScript
+- **Frontend**: Chart.js, Font Awesome
+- **Backend**: Express, Mongoose, Socket.IO, Nodemailer, OpenAI
+- **Development**: Nodemon, Jest
+- **Web Scraping**: Axios, Cheerio
 
 ### Performance
 - **Optimized Assets**: Minified CSS, efficient JavaScript
 - **Lazy Loading**: Images and components loaded as needed
-- **Local Storage**: Client-side data persistence
-- **Fast Interactions**: Smooth animations and transitions
+- **Database Storage**: MongoDB for persistent data
+- **Fast Interactions**: Smooth animations and micro-interactions
 
 ## 🚀 Key Features Explained
 
@@ -186,6 +231,13 @@ The system includes demo accounts for testing:
 - **Export Options**: PDF, Excel, and image formats
 - **Filtering**: Date ranges, categories, and user groups
 
+### Tender Tracking Engine
+- **Portal Monitoring**: Automated scanning of tender portals
+- **Real-time Notifications**: Instant alerts via WebSockets
+- **AI Enhancement**: Intelligent tender processing
+- **Email Alerts**: SMTP-based notification system
+- **Data Persistence**: MongoDB database storage
+
 ## 🔒 Security Features
 
 ### Data Protection
@@ -198,104 +250,10 @@ The system includes demo accounts for testing:
 - **Password Requirements**: Enforced complexity rules
 - **Session Management**: Secure token handling
 - **Error Handling**: User-friendly error messages
-- **Audit Logging**: User action tracking (simulated)
 
-## 📱 Mobile Experience
+## 📚 Additional Documentation
 
-### Responsive Features
-- **Collapsible Navigation**: Mobile-optimized sidebar
-- **Touch Interactions**: Swipe gestures and touch-friendly buttons
-- **Adaptive Layouts**: Grid systems that reflow on small screens
-- **Performance**: Optimized for slower mobile connections
-
-### Mobile-Specific Enhancements
-- **Touch Targets**: Minimum 44px tap targets
-- **Readable Fonts**: Optimized typography for small screens
-- **Fast Loading**: Minimal asset sizes and efficient code
-- **Offline Support**: Service worker for basic offline functionality
-
-## 🧪 Testing
-
-### Manual Testing
-- **Cross-Browser**: Test in Chrome, Firefox, Safari, Edge
-- **Device Testing**: Desktop, tablet, and mobile devices
-- **User Flows**: Complete feature testing scenarios
-- **Accessibility**: Screen reader and keyboard testing
-
-### Test Scenarios
-1. **Login Flow**: All user roles and error cases
-2. **File Upload**: Various file types and sizes
-3. **Document Management**: CRUD operations
-4. **Analytics**: Chart rendering and data accuracy
-5. **Responsive**: All breakpoints and orientations
-
-## 🚀 Deployment
-
-### Production Setup
-1. **Web Server**: Deploy to any web server (Apache, Nginx, etc.)
-2. **HTTPS**: Enable SSL/TLS for security
-3. **CDN**: Use CDN for static assets if needed
-4. **Monitoring**: Set up analytics and error tracking
-
-### Environment Configuration
-- **API Endpoints**: Update for production API calls
-- **Storage**: Configure proper document storage
-- **Authentication**: Integrate with real authentication system
-- **Database**: Connect to production database
-
-## 🤝 Contributing
-
-### Development Setup
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Make changes and test thoroughly
-4. Commit changes: `git commit -m 'Add feature'`
-5. Push to branch: `git push origin feature-name`
-6. Submit pull request
-
-### Code Standards
-- **JavaScript**: ES6+ with proper error handling
-- **CSS**: BEM methodology and consistent naming
-- **HTML**: Semantic markup and accessibility
-- **Comments**: Clear documentation for complex logic
-
-## 📞 Support
-
-### Documentation
-- **User Guide**: Comprehensive feature documentation
-- **API Reference**: JavaScript function documentation
-- **Troubleshooting**: Common issues and solutions
-- **FAQ**: Frequently asked questions
-
-### Contact Information
-- **Email**: support@kmrl.com
-- **Documentation**: [Internal Documentation]
-- **Issues**: GitHub Issues for bug reports
-- **Community**: Internal forums and chat
-
-## 🗂️ Changelog
-
-### Version 1.0.0 (Current)
-- ✅ Initial release with core functionality
-- ✅ Role-based authentication system
-- ✅ Document upload and management
-- ✅ Analytics dashboard with Chart.js
-- ✅ Responsive design for all devices
-- ✅ AI chatbot integration
-- ✅ Admin panel for system management
-
-### Planned Features
-- 🔄 Real-time notifications
-- 🔄 Advanced search with OCR
-- 🔄 Document versioning
-- 🔄 Advanced approval workflows
-- 🔄 Integration APIs
-- 🔄 Advanced analytics
-
-## 📄 License
-
-This project is proprietary software developed for KMRL. All rights reserved.
-
----
-
-**KMRL Document Management System** - Streamlining document workflows with modern web technology.
+For detailed information about the backend architecture, see:
+- [README_BACKEND.md](README_BACKEND.md) - Backend architecture documentation
+- [SYSTEM_INTEGRATION_GUIDE.md](SYSTEM_INTEGRATION_GUIDE.md) - Integration guide
+- [SYSTEM_VALIDATION_GUIDE.md](SYSTEM_VALIDATION_GUIDE.md) - Validation guide

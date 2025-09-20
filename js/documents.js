@@ -5,7 +5,104 @@ class DocumentsManager {
         this.documents = [];
         this.currentPage = 1;
         this.itemsPerPage = 10;
+        this.currentUser = this.getCurrentUser();
         this.init();
+    }
+
+    getCurrentUser() {
+        try {
+            const userData = localStorage.getItem('kmrl_user');
+            return userData ? JSON.parse(userData) : null;
+        } catch (error) {
+            console.error('Error getting user data:', error);
+            return null;
+        }
+    }
+
+    // Authorization methods
+    canUserApprove(document) {
+        if (!this.currentUser) return false;
+        const role = this.currentUser.role;
+
+        // Only admins and managers can approve
+        if (!['admin', 'manager'].includes(role)) return false;
+
+        // Document must be pending
+        if (document.status !== 'pending') return false;
+
+        // Managers can only approve documents from their department
+        if (role === 'manager') {
+            return this.isDocumentInUserDepartment(document);
+        }
+
+        return true; // Admin can approve all
+    }
+
+    canUserReject(document) {
+        return this.canUserApprove(document); // Same rules as approve
+    }
+
+    canUserEdit(document) {
+        if (!this.currentUser) return false;
+        const role = this.currentUser.role;
+
+        // Admin can edit all documents
+        if (role === 'admin') return true;
+
+        // Staff can only edit their own documents if pending
+        if (role === 'staff') {
+            return (document.uploadedBy === this.currentUser.name ||
+                document.uploadedBy === this.currentUser.id) &&
+                document.status === 'pending';
+        }
+
+        // Managers cannot edit documents
+        return false;
+    }
+
+    canUserDelete(document) {
+        if (!this.currentUser) return false;
+
+        // Only admin can delete documents
+        return this.currentUser.role === 'admin';
+    }
+
+    canUserView(document) {
+        if (!this.currentUser) return false;
+        const role = this.currentUser.role;
+
+        // Admin can view all
+        if (role === 'admin') return true;
+
+        // Manager can view documents from their department
+        if (role === 'manager') {
+            return this.isDocumentInUserDepartment(document);
+        }
+
+        // Staff can only view their own documents
+        if (role === 'staff') {
+            return document.uploadedBy === this.currentUser.name ||
+                document.uploadedBy === this.currentUser.id;
+        }
+
+        return false;
+    }
+
+    isDocumentInUserDepartment(document) {
+        if (!this.currentUser.department) return false;
+
+        // Check if document has department field
+        if (document.department) {
+            return document.department === this.currentUser.department;
+        }
+
+        // Check uploader's department
+        const users = JSON.parse(localStorage.getItem('kmrl_users') || '[]');
+        const uploader = users.find(user =>
+            user.name === document.uploadedBy || user.id === document.uploadedBy
+        );
+
+        return uploader && uploader.department === this.currentUser.department;
     }
 
     init() {
@@ -23,8 +120,15 @@ class DocumentsManager {
 
     loadDocuments() {
         const storedDocs = localStorage.getItem('kmrl_documents');
-        this.documents = storedDocs ? JSON.parse(storedDocs) : this.generateSampleDocuments();
-        localStorage.setItem('kmrl_documents', JSON.stringify(this.documents));
+        let allDocuments = storedDocs ? JSON.parse(storedDocs) : this.generateSampleDocuments();
+
+        // Filter documents based on user permissions
+        this.documents = allDocuments.filter(doc => this.canUserView(doc));
+
+        // Store sample documents if they don't exist
+        if (!storedDocs) {
+            localStorage.setItem('kmrl_documents', JSON.stringify(allDocuments));
+        }
     }
 
     generateSampleDocuments() {
@@ -102,19 +206,28 @@ class DocumentsManager {
                 <td>${this.formatFileSize(doc.files[0]?.size || 0)}</td>
                 <td>
                     <div class="document-actions">
-                        <button class="action-btn action-view" onclick="viewDocument('${doc.id}')">
+                        <button class="action-btn action-view" onclick="viewDocument('${doc.id}')" title="View document">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="action-btn action-download" onclick="downloadDocument('${doc.id}')">
+                        <button class="action-btn action-download" onclick="downloadDocument('${doc.id}')" title="Download document">
                             <i class="fas fa-download"></i>
                         </button>
-                        ${doc.status === 'pending' ? `
-                        <button class="action-btn action-approve" onclick="approveDocument('${doc.id}')">
+                        ${this.canUserApprove(doc) ? `
+                        <button class="action-btn action-approve" onclick="approveDocument('${doc.id}')" data-action="approve" title="Approve document">
                             <i class="fas fa-check"></i>
                         </button>` : ''}
-                        <button class="action-btn action-delete" onclick="deleteDocument('${doc.id}')">
+                        ${this.canUserReject(doc) ? `
+                        <button class="action-btn action-reject" onclick="rejectDocument('${doc.id}')" data-action="reject" title="Reject document">
+                            <i class="fas fa-times"></i>
+                        </button>` : ''}
+                        ${this.canUserEdit(doc) ? `
+                        <button class="action-btn action-edit" onclick="editDocument('${doc.id}')" data-action="edit" title="Edit document">
+                            <i class="fas fa-edit"></i>
+                        </button>` : ''}
+                        ${this.canUserDelete(doc) ? `
+                        <button class="action-btn action-delete" onclick="deleteDocument('${doc.id}')" data-action="delete" title="Delete document">
                             <i class="fas fa-trash"></i>
-                        </button>
+                        </button>` : ''}
                     </div>
                 </td>
             `;
@@ -144,7 +257,233 @@ function applyFilters() {
 }
 
 function viewDocument(id) {
-    alert('View document: ' + id);
+    // Get document details
+    const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+    const document = documents.find(doc => doc.id === id);
+
+    if (!document) {
+        alert('Document not found');
+        return;
+    }
+
+    // Increment view count
+    document.views = (document.views || 0) + 1;
+    localStorage.setItem('kmrl_documents', JSON.stringify(documents));
+
+    // Create and show modal with document details
+    const modal = createDocumentViewModal(document);
+    document.body.appendChild(modal);
+    modal.classList.add('show');
+}
+
+function createDocumentViewModal(doc) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+
+    modal.innerHTML = `
+        <div class="modal-dialog" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-content" style="background: white; border-radius: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="padding: 2rem 2rem 1rem 2rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="margin: 0; color: #1e293b; font-size: 1.5rem;">
+                            <i class="fas fa-file-alt" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                            ${doc.title}
+                        </h2>
+                        <p style="margin: 0.5rem 0 0 0; color: #64748b;">Document Details & Attributes</p>
+                    </div>
+                    <button type="button" class="close-btn" onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer; padding: 0.5rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body" style="padding: 2rem;">
+                    <!-- Document Info Grid -->
+                    <div class="doc-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                        
+                        <!-- Basic Information -->
+                        <div class="info-section">
+                            <h4 style="margin: 0 0 1rem 0; color: #374151; font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                                <i class="fas fa-info-circle" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                                Basic Information
+                            </h4>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Title:</label>
+                                <span style="color: #1e293b;">${doc.title}</span>
+                            </div>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Category:</label>
+                                <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; text-transform: capitalize;">${doc.category}</span>
+                            </div>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Status:</label>
+                                <span class="status-badge status-${doc.status}" style="padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500; text-transform: capitalize;">${doc.status}</span>
+                            </div>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Access Level:</label>
+                                <span style="color: #1e293b; text-transform: capitalize;">${doc.accessLevel || 'Not specified'}</span>
+                            </div>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Description:</label>
+                                <span style="color: #1e293b;">${doc.description || 'No description available'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Upload Information -->
+                        <div class="info-section">
+                            <h4 style="margin: 0 0 1rem 0; color: #374151; font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                                <i class="fas fa-upload" style="color: #059669; margin-right: 0.5rem;"></i>
+                                Upload Information
+                            </h4>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Uploaded By:</label>
+                                <span style="color: #1e293b;">${doc.uploadedBy}</span>
+                            </div>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Upload Date:</label>
+                                <span style="color: #1e293b;">${new Date(doc.uploadedAt).toLocaleString()}</span>
+                            </div>
+                            <div class="info-item" style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.25rem;">Document ID:</label>
+                                <span style="color: #6b7280; font-family: monospace; font-size: 0.9rem;">${doc.id}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Information -->
+                    <div class="file-info-section" style="margin-bottom: 2rem;">
+                        <h4 style="margin: 0 0 1rem 0; color: #374151; font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                            <i class="fas fa-file" style="color: #d97706; margin-right: 0.5rem;"></i>
+                            File Information
+                        </h4>
+                        ${doc.files && doc.files.length > 0 ? doc.files.map(file => `
+                            <div class="file-item" style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
+                                <div style="display: flex; align-items: center; justify-content: between; margin-bottom: 0.5rem;">
+                                    <div style="display: flex; align-items: center; flex: 1;">
+                                        <i class="fas fa-file-${getFileIcon(file.type)}" style="color: #2563eb; margin-right: 0.5rem; font-size: 1.2rem;"></i>
+                                        <span style="font-weight: 600; color: #1e293b;">${file.name}</span>
+                                    </div>
+                                    <span style="background: #e5e7eb; color: #374151; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem;">${formatFileSize(file.size)}</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+                                    <div>
+                                        <label style="font-weight: 600; color: #4b5563;">Type:</label>
+                                        <span style="color: #1e293b;">${file.type || 'Unknown'}</span>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #4b5563;">Size:</label>
+                                        <span style="color: #1e293b;">${formatFileSize(file.size)}</span>
+                                    </div>
+                                    ${file.lastModified ? `
+                                    <div>
+                                        <label style="font-weight: 600; color: #4b5563;">Modified:</label>
+                                        <span style="color: #1e293b;">${new Date(file.lastModified).toLocaleDateString()}</span>
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: #6b7280; font-style: italic;">No file information available</p>'}
+                    </div>
+
+                    <!-- Tags & Statistics -->
+                    <div class="tags-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                        
+                        <!-- Tags -->
+                        <div class="tags-section">
+                            <h4 style="margin: 0 0 1rem 0; color: #374151; font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                                <i class="fas fa-tags" style="color: #7c3aed; margin-right: 0.5rem;"></i>
+                                Tags
+                            </h4>
+                            <div class="tags-container">
+                                ${doc.tags && doc.tags.length > 0 ?
+            doc.tags.map(tag => `<span class="tag" style="display: inline-block; background: #f3f4f6; color: #374151; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; margin: 0.25rem 0.25rem 0.25rem 0;">${tag}</span>`).join('') :
+            '<p style="color: #6b7280; font-style: italic;">No tags assigned</p>'
+        }
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="stats-section">
+                            <h4 style="margin: 0 0 1rem 0; color: #374151; font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                                <i class="fas fa-chart-bar" style="color: #dc2626; margin-right: 0.5rem;"></i>
+                                Statistics
+                            </h4>
+                            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div class="stat-item" style="text-align: center; padding: 1rem; background: #f0fdf4; border-radius: 0.5rem; border: 1px solid #dcfce7;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">${doc.views || 0}</div>
+                                    <div style="font-size: 0.8rem; color: #065f46;">Views</div>
+                                </div>
+                                <div class="stat-item" style="text-align: center; padding: 1rem; background: #eff6ff; border-radius: 0.5rem; border: 1px solid #bfdbfe;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #2563eb;">${doc.downloads || 0}</div>
+                                    <div style="font-size: 0.8rem; color: #1e40af;">Downloads</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer" style="padding: 1rem 2rem 2rem 2rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()" style="padding: 0.75rem 1.5rem; border: 1px solid #d1d5db; background: white; color: #374151; border-radius: 0.5rem; cursor: pointer;">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="downloadDocument('${doc.id}'); this.closest('.modal').remove();" style="padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                        <i class="fas fa-download" style="margin-right: 0.5rem;"></i>
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add show class for animation
+    setTimeout(() => {
+        modal.style.opacity = '1';
+    }, 10);
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+
+    return modal;
+}
+
+function getFileIcon(mimeType) {
+    if (!mimeType) return 'file';
+
+    if (mimeType.includes('pdf')) return 'pdf';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'word';
+    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'excel';
+    if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'powerpoint';
+    if (mimeType.includes('image')) return 'image';
+    if (mimeType.includes('video')) return 'video';
+    if (mimeType.includes('audio')) return 'audio';
+    if (mimeType.includes('text')) return 'alt';
+    if (mimeType.includes('zip') || mimeType.includes('archive')) return 'archive';
+
+    return 'file';
+}
+
+function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 function downloadDocument(id) {
@@ -152,47 +491,121 @@ function downloadDocument(id) {
 }
 
 function approveDocument(id) {
+    // Backend validation - Check user permissions
+    const currentUser = JSON.parse(localStorage.getItem('kmrl_user') || 'null');
+    if (!currentUser) {
+        if (window.showNotification) {
+            window.showNotification('Access Denied: Please log in to continue', 'error');
+        }
+        return;
+    }
+
+    if (!['admin', 'manager'].includes(currentUser.role)) {
+        if (window.showNotification) {
+            window.showNotification('Access Denied: You do not have permission to approve documents', 'error');
+        } else {
+            alert('Access Denied: You do not have permission to approve documents');
+        }
+        return;
+    }
+
     try {
         // Get existing documents
         const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
 
-        // Find and update the document
+        // Find and validate the document
         const docIndex = documents.findIndex(doc => doc.id === id);
-        if (docIndex !== -1) {
-            documents[docIndex].status = 'approved';
-
-            // Save back to localStorage
-            localStorage.setItem('kmrl_documents', JSON.stringify(documents));
-
-            // Show success notification
-            if (window.showNotification) {
-                window.showNotification('Document approved successfully!', 'success');
-            } else {
-                alert('Document approved successfully!');
-            }
-
-            // Refresh the documents list
-            if (window.documentsManager) {
-                window.documentsManager.applyFilters();
-            }
-        } else {
+        if (docIndex === -1) {
             throw new Error('Document not found');
+        }
+
+        const document = documents[docIndex];
+
+        // Additional validation for managers - department check
+        if (currentUser.role === 'manager') {
+            const users = JSON.parse(localStorage.getItem('kmrl_users') || '[]');
+            const uploader = users.find(user =>
+                user.name === document.uploadedBy || user.id === document.uploadedBy
+            );
+
+            if (!uploader || uploader.department !== currentUser.department) {
+                throw new Error('You can only approve documents from your department');
+            }
+        }
+
+        // Check if document is in pending status
+        if (document.status !== 'pending') {
+            throw new Error('Only pending documents can be approved');
+        }
+
+        // Update document status
+        documents[docIndex].status = 'approved';
+        documents[docIndex].approvedAt = new Date().toISOString();
+        documents[docIndex].approvedBy = currentUser.name;
+
+        // Save back to localStorage
+        localStorage.setItem('kmrl_documents', JSON.stringify(documents));
+
+        // Log the approval
+        logSecurityAction('approve_document', {
+            documentId: id,
+            documentTitle: document.title,
+            approvedBy: currentUser.name,
+            timestamp: new Date().toISOString()
+        });
+
+        // Show success notification
+        if (window.showNotification) {
+            window.showNotification('Document approved successfully!', 'success');
+        } else {
+            alert('Document approved successfully!');
+        }
+
+        // Refresh the documents list
+        if (window.documentsManager) {
+            window.documentsManager.loadDocuments();
+            window.documentsManager.applyFilters();
         }
     } catch (error) {
         console.error('Error approving document:', error);
         if (window.showNotification) {
-            window.showNotification('Failed to approve document', 'error');
+            window.showNotification('Failed to approve document: ' + error.message, 'error');
         } else {
-            alert('Failed to approve document');
+            alert('Failed to approve document: ' + error.message);
         }
     }
 }
 
 function deleteDocument(id) {
+    // Backend validation - Check user permissions
+    const currentUser = JSON.parse(localStorage.getItem('kmrl_user') || 'null');
+    if (!currentUser || currentUser.role !== 'admin') {
+        if (window.showNotification) {
+            window.showNotification('Access Denied: Only administrators can delete documents', 'error');
+        } else {
+            alert('Access Denied: Only administrators can delete documents');
+        }
+        return;
+    }
+
     if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
         try {
             // Get existing documents
             const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+            // Additional validation - ensure document exists
+            const docIndex = documents.findIndex(doc => doc.id === id);
+            if (docIndex === -1) {
+                throw new Error('Document not found');
+            }
+
+            // Log the deletion attempt
+            logSecurityAction('delete_document', {
+                documentId: id,
+                documentTitle: documents[docIndex].title,
+                user: currentUser.name,
+                timestamp: new Date().toISOString()
+            });
 
             // Filter out the document to delete
             const updatedDocuments = documents.filter(doc => doc.id !== id);
@@ -209,14 +622,15 @@ function deleteDocument(id) {
 
             // Refresh the documents list
             if (window.documentsManager) {
+                window.documentsManager.loadDocuments();
                 window.documentsManager.applyFilters();
             }
         } catch (error) {
             console.error('Error deleting document:', error);
             if (window.showNotification) {
-                window.showNotification('Failed to delete document', 'error');
+                window.showNotification('Failed to delete document: ' + error.message, 'error');
             } else {
-                alert('Failed to delete document');
+                alert('Failed to delete document: ' + error.message);
             }
         }
     }
@@ -291,3 +705,173 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('kmrl_documents', JSON.stringify(sampleDocs));
     }
 });
+
+// Reject document function with backend validation
+function rejectDocument(id) {
+    // Backend validation - Check user permissions
+    const currentUser = JSON.parse(localStorage.getItem('kmrl_user') || 'null');
+    if (!currentUser) {
+        if (window.showNotification) {
+            window.showNotification('Access Denied: Please log in to continue', 'error');
+        }
+        return;
+    }
+
+    if (!['admin', 'manager'].includes(currentUser.role)) {
+        if (window.showNotification) {
+            window.showNotification('Access Denied: You do not have permission to reject documents', 'error');
+        } else {
+            alert('Access Denied: You do not have permission to reject documents');
+        }
+        return;
+    }
+
+    // Get rejection reason
+    const reason = prompt('Please provide a reason for rejection:');
+    if (!reason || !reason.trim()) {
+        if (window.showNotification) {
+            window.showNotification('Rejection reason is required', 'warning');
+        }
+        return;
+    }
+
+    try {
+        // Get existing documents
+        const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+        // Find and validate the document
+        const docIndex = documents.findIndex(doc => doc.id === id);
+        if (docIndex === -1) {
+            throw new Error('Document not found');
+        }
+
+        const document = documents[docIndex];
+
+        // Additional validation for managers - department check
+        if (currentUser.role === 'manager') {
+            const users = JSON.parse(localStorage.getItem('kmrl_users') || '[]');
+            const uploader = users.find(user =>
+                user.name === document.uploadedBy || user.id === document.uploadedBy
+            );
+
+            if (!uploader || uploader.department !== currentUser.department) {
+                throw new Error('You can only reject documents from your department');
+            }
+        }
+
+        // Check if document is in pending status
+        if (document.status !== 'pending') {
+            throw new Error('Only pending documents can be rejected');
+        }
+
+        // Update document status
+        documents[docIndex].status = 'rejected';
+        documents[docIndex].rejectedAt = new Date().toISOString();
+        documents[docIndex].rejectedBy = currentUser.name;
+        documents[docIndex].rejectionReason = reason;
+
+        // Save back to localStorage
+        localStorage.setItem('kmrl_documents', JSON.stringify(documents));
+
+        // Log the rejection
+        logSecurityAction('reject_document', {
+            documentId: id,
+            documentTitle: document.title,
+            rejectedBy: currentUser.name,
+            reason: reason,
+            timestamp: new Date().toISOString()
+        });
+
+        // Show success notification
+        if (window.showNotification) {
+            window.showNotification('Document rejected successfully!', 'success');
+        } else {
+            alert('Document rejected successfully!');
+        }
+
+        // Refresh the documents list
+        if (window.documentsManager) {
+            window.documentsManager.loadDocuments();
+            window.documentsManager.applyFilters();
+        }
+    } catch (error) {
+        console.error('Error rejecting document:', error);
+        if (window.showNotification) {
+            window.showNotification('Failed to reject document: ' + error.message, 'error');
+        } else {
+            alert('Failed to reject document: ' + error.message);
+        }
+    }
+}
+
+// Edit document function with validation
+function editDocument(id) {
+    const currentUser = JSON.parse(localStorage.getItem('kmrl_user') || 'null');
+    if (!currentUser) {
+        if (window.showNotification) {
+            window.showNotification('Access Denied: Please log in to continue', 'error');
+        }
+        return;
+    }
+
+    // Get document and validate permissions
+    const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+    const document = documents.find(doc => doc.id === id);
+
+    if (!document) {
+        if (window.showNotification) {
+            window.showNotification('Document not found', 'error');
+        }
+        return;
+    }
+
+    // Check permissions
+    if (currentUser.role !== 'admin' &&
+        (currentUser.role !== 'staff' || document.uploadedBy !== currentUser.name)) {
+        if (window.showNotification) {
+            window.showNotification('Access Denied: You can only edit your own documents', 'error');
+        }
+        return;
+    }
+
+    // Only allow editing of pending documents
+    if (document.status !== 'pending' && currentUser.role !== 'admin') {
+        if (window.showNotification) {
+            window.showNotification('You can only edit pending documents', 'warning');
+        }
+        return;
+    }
+
+    // Redirect to upload page with edit parameters
+    window.location.href = `upload.html?edit=${id}`;
+}
+
+// Security logging function
+function logSecurityAction(action, details) {
+    try {
+        const securityLog = JSON.parse(localStorage.getItem('kmrl_security_log') || '[]');
+
+        const logEntry = {
+            id: Date.now().toString(),
+            action: action,
+            details: details,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            sessionId: localStorage.getItem('kmrl_session_id') || 'unknown'
+        };
+
+        securityLog.push(logEntry);
+
+        // Keep only last 1000 entries
+        if (securityLog.length > 1000) {
+            securityLog.splice(0, securityLog.length - 1000);
+        }
+
+        localStorage.setItem('kmrl_security_log', JSON.stringify(securityLog));
+
+        // In production, this would also send to server
+        console.log('Security action logged:', logEntry);
+    } catch (error) {
+        console.error('Failed to log security action:', error);
+    }
+}

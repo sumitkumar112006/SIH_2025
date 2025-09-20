@@ -101,10 +101,16 @@ class CommonManager {
             el.style.display = role === 'admin' ? 'block' : 'none';
         });
 
-        // Hide/show manager+ elements
+        // Hide/show manager-only elements (for managers and admins)
         const managerElements = document.querySelectorAll('.manager-only');
         managerElements.forEach(el => {
             el.style.display = ['admin', 'manager'].includes(role) ? 'block' : 'none';
+        });
+
+        // Show manager panel link for managers and admins
+        const managerPanelLinks = document.querySelectorAll('a[href="manager.html"]');
+        managerPanelLinks.forEach(link => {
+            link.style.display = ['admin', 'manager'].includes(role) ? 'block' : 'none';
         });
 
         // Update active navigation item

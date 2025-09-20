@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMRL Tender Tracker - Automated Tender Monitoring System</title>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        /* Tender Tracker Specific Styles */
+        .tender-tracker-page {
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: fit-content;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar h3 {
+            margin: 0 0 1.5rem 0;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-stats {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .monitoring-panel {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .monitoring-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .main-content {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .tender-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tender-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .tender-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .tender-card.urgent {
+            border-left-color: #dc2626;
+        }
+
+        .tender-card.high {
+            border-left-color: #f59e0b;
+        }
+
+        .tender-card.medium {
+            border-left-color: #10b981;
+        }
+
+        .tender-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .tender-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-badge.urgent {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .priority-badge.high {
+            background: #fffbeb;
+            color: #f59e0b;
+        }
+
+        .priority-badge.medium {
+            background: #f0fdf4;
+            color: #10b981;
+        }
+
+        .tender-meta {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tender-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-outline {
+            background: white;
+            border-color: #d1d5db;
+            color: #374151;
+        }
+
+        .btn-outline:hover {
+            background: #f9fafb;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-tenders {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .portal-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .portal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .portal-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .portal-status.error {
+            background: #dc2626;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .tender-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="tender-tracker-page">
+    <!-- Header -->
+    <header class="header">
+        <h1>
+            <i class="fas fa-gavel"></i>
+            KMRL Tender Tracker
+        </h1>
+        <div class="header-actions">
+            <div class="notification-bell">
+                <button id="notificationBellBtn" class="notification-bell-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-count" id="notificationCount">0</span>
+                </button>
+            </div>
+            <button class="btn btn-outline" onclick="location.href='unified-dashboard.html'">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h3><i class="fas fa-chart-line"></i> Overview</h3>
+
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTenders">-</div>
+                    <div class="stat-label">Total Tenders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="newToday">-</div>
+                    <div class="stat-label">New Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="urgentTenders">-</div>
+                    <div class="stat-label">Urgent</div>
+                </div>
+            </div>
+
+            <div class="monitoring-panel">
+                <h4><i class="fas fa-radar"></i> Monitoring Status</h4>
+                <div class="monitoring-status">
+                    <div class="status-dot"></div>
+                    <span>Active Monitoring</span>
+                </div>
+                <p class="last-scan">Last scan: <span id="lastScanTime">-</span></p>
+                <p class="next-scan">Next scan: <span id="nextScanTime">-</span></p>
+            </div>
+
+            <div class="portal-panel">
+                <h4><i class="fas fa-globe"></i> Portal Status</h4>
+                <ul class="portal-list" id="portalList">
+                    <!-- Portal status will be loaded here -->
+                </ul>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button class="btn btn-primary" style="width: 100%;" onclick="openTenderManager()">
+                    <i class="fas fa-cog"></i>
+                    Manage Tenders
+                </button>
+            </div>
+
+            <!-- Navigation to other tracking systems -->
+            <div style="margin-top: 2rem;">
+                <h4><i class="fas fa-link"></i> Related Systems</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="btn btn-outline" onclick="location.href='unified-dashboard.html'">
+                        <i class="fas fa-project-diagram"></i>
+                        Unified Dashboard
+                    </button>
+                    <button class="btn btn-outline"
+                        onclick="if(window.techTracker) window.techTracker.openTechModal(); else alert('Technology tracker not available')">
+                        <i class="fas fa-microchip"></i>
+                        Tech Updates
+                    </button>
+                    <button class="btn btn-outline"
+                        onclick="if(window.projectTracker) window.projectTracker.openProjectModal(); else alert('Project tracker not available')">
+                        <i class="fas fa-tasks"></i>
+                        Project Tracker
+                    </button>
+                    <button class="btn btn-outline"
+                        onclick="if(window.archiveSystem) window.archiveSystem.openArchiveModal(); else alert('Archive system not available')">
+                        <i class="fas fa-archive"></i>
+                        Historical Archive
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Active Tenders</h2>
+                <div class="content-actions">
+                    <button class="btn btn-outline" onclick="refreshTenders()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-primary" onclick="performManualScan()">
+                        <i class="fas fa-search"></i>
+                        Manual Scan
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingState" class="loading-state" style="display: none;">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <p>Scanning portals for new tenders...</p>
+            </div>
+
+            <div id="tenderGrid" class="tender-grid">
+                <!-- Tenders will be loaded here -->
+            </div>
+
+            <div id="noTendersState" class="no-tenders" style="display: none;">
+                <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; color: #d1d5db;"></i>
+                <h3>No Tenders Found</h3>
+                <p>Start monitoring to discover new tender opportunities</p>
+                <button class="btn btn-primary" onclick="performManualScan()">
+                    <i class="fas fa-play"></i>
+                    Start Scanning
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/common.js"></script>
+    <script src="js/notification-system.js"></script>
+    <script src="js/portal-monitor.js"></script>
+    <script src="js/tender-tracker.js"></script>
+    <script src="js/tender-analytics.js"></script>
+
+    <script>
+        // Initialize the tender tracker page
+        class TenderTrackerPage {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.loadTenders();
+                this.updateStats();
+                this.updatePortalStatus();
+                this.setupAutoRefresh();
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Auto-update when new tenders are found
+                window.addEventListener('tendersUpdated', () => {
+                    this.loadTenders();
+                    this.updateStats();
+                });
+
+                // Update portal status periodically
+                setInterval(() => {
+                    this.updatePortalStatus();
+                }, 30000);
+            }
+
+            loadTenders() {
+                const grid = document.getElementById('tenderGrid');
+                const loadingState = document.getElementById('loadingState');
+                const noTendersState = document.getElementById('noTendersState');
+
+                // Get tenders from tender tracker
+                const tenders = window.tenderTracker ? window.tenderTracker.tenders : [];
+
+                if (tenders.length === 0) {
+                    grid.style.display = 'none';
+                    noTendersState.style.display = 'block';
+                    return;
+                }
+
+                grid.style.display = 'grid';
+                noTendersState.style.display = 'none';
+
+                // Sort tenders by priority and date
+                const sortedTenders = tenders.sort((a, b) => {
+                    const priorityOrder = { urgent: 3, high: 2, medium: 1, low: 0 };
+                    const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+                    if (priorityDiff !== 0) return priorityDiff;
+                    return new Date(b.addedDate) - new Date(a.addedDate);
+                });
+
+                grid.innerHTML = sortedTenders.map(tender => this.renderTenderCard(tender)).join('');
+            }
+
+            renderTenderCard(tender) {
+                const daysRemaining = this.calculateDaysRemaining(tender.submissionDeadline);
+
+                return `
+                    <div class="tender-card ${tender.priority}">
+                        <div class="tender-header">
+                            <h3 class="tender-title">${tender.title}</h3>
+                            <span class="priority-badge ${tender.priority}">${tender.priority}</span>
+                        </div>
+                        
+                        <div class="tender-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-building"></i>
+                                <span>${tender.organization}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${tender.location}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>₹${this.formatValue(tender.value)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Deadline: ${this.formatDate(tender.submissionDeadline)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span class="${daysRemaining <= 3 ? 'text-danger' : ''}">${daysRemaining}</span>
+                            </div>
+                        </div>
+                        
+                        <p class="tender-description">${tender.description}</p>
+                        
+                        <div class="tender-actions">
+                            <button class="btn btn-primary" onclick="viewTender('${tender.id}')">
+                                <i class="fas fa-eye"></i>
+                                View Details
+                            </button>
+                            <button class="btn btn-outline" onclick="trackTender('${tender.id}')">
+                                <i class="fas fa-bookmark"></i>
+                                ${tender.tracked ? 'Untrack' : 'Track'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            updateStats() {
+                const tenders = window.tenderTracker ? window.tenderTracker.tenders : [];
+
+                const totalTenders = tenders.length;
+                const newToday = tenders.filter(t =>
+                    new Date(t.addedDate).toDateString() === new Date().toDateString()
+                ).length;
+                const urgentTenders = tenders.filter(t => t.priority === 'urgent').length;
+
+                document.getElementById('totalTenders').textContent = totalTenders;
+                document.getElementById('newToday').textContent = newToday;
+                document.getElementById('urgentTenders').textContent = urgentTenders;
+            }
+
+            updatePortalStatus() {
+                const portalList = document.getElementById('portalList');
+
+                if (window.portalMonitor) {
+                    const status = window.portalMonitor.getPortalStatus();
+
+                    portalList.innerHTML = status.portals.map(portal => `
+                        <li class="portal-item">
+                            <div>
+                                <div class="portal-status ${portal.active ? '' : 'error'}"></div>
+                                <span>${portal.name}</span>
+                            </div>
+                            <small>${portal.totalTenders} tenders</small>
+                        </li>
+                    `).join('');
+
+                    // Update scan times
+                    if (status.lastScanTime) {
+                        document.getElementById('lastScanTime').textContent =
+                            this.formatRelativeTime(status.lastScanTime);
+                    }
+
+                    if (status.nextScanTime) {
+                        document.getElementById('nextScanTime').textContent =
+                            this.formatRelativeTime(status.nextScanTime);
+                    }
+                }
+            }
+
+            setupAutoRefresh() {
+                // Refresh stats every 30 seconds
+                setInterval(() => {
+                    this.updateStats();
+                }, 30000);
+            }
+
+            formatValue(value) {
+                if (value >= 10000000) {
+                    return (value / 10000000).toFixed(1) + ' Cr';
+                } else if (value >= 100000) {
+                    return (value / 100000).toFixed(1) + ' L';
+                } else {
+                    return (value / 1000).toFixed(0) + ' K';
+                }
+            }
+
+            formatDate(dateString) {
+                return new Date(dateString).toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
+            calculateDaysRemaining(deadline) {
+                const now = new Date();
+                const deadlineDate = new Date(deadline);
+                const diffTime = deadlineDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays < 0) return 'Expired';
+                if (diffDays === 0) return 'Today';
+                if (diffDays === 1) return '1 day remaining';
+                return `${diffDays} days remaining`;
+            }
+
+            formatRelativeTime(date) {
+                const now = new Date();
+                const diffMs = now - new Date(date);
+                const diffMins = Math.floor(diffMs / 60000);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+
+                const diffHours = Math.floor(diffMins / 60);
+                if (diffHours < 24) return `${diffHours}h ago`;
+
+                return `${Math.floor(diffHours / 24)}d ago`;
+            }
+        }
+
+        // Global functions
+        function openTenderManager() {
+            if (window.tenderTracker) {
+                window.tenderTracker.openTenderModal();
+            }
+        }
+
+        function refreshTenders() {
+            window.tenderTrackerPage.loadTenders();
+            window.tenderTrackerPage.updateStats();
+        }
+
+        function performManualScan() {
+            const loadingState = document.getElementById('loadingState');
+            loadingState.style.display = 'block';
+
+            if (window.portalMonitor) {
+                window.portalMonitor.performScan().then(() => {
+                    loadingState.style.display = 'none';
+                    window.tenderTrackerPage.loadTenders();
+                    window.tenderTrackerPage.updateStats();
+                });
+            }
+        }
+
+        function viewTender(tenderId) {
+            if (window.tenderTracker) {
+                window.tenderTracker.viewTender(tenderId);
+            }
+        }
+
+        function trackTender(tenderId) {
+            if (window.tenderTracker) {
+                window.tenderTracker.trackTender(tenderId);
+                window.tenderTrackerPage.loadTenders();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.tenderTrackerPage = new TenderTrackerPage();
+        });
+    </script>
+</body>
+
+</html>
