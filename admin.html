@@ -536,11 +536,17 @@
                         <p>System administration and user management</p>
                     </div>
                     <div class="admin-actions">
-                        <button class="btn btn-primary">
+                        <button class="btn btn-primary add-user-btn">
                             <i class="fas fa-plus"></i> Add User
                         </button>
-                        <button class="btn btn-secondary">
+                        <button class="btn btn-secondary system-settings-btn">
                             <i class="fas fa-cog"></i> Settings
+                        </button>
+                        <button class="btn btn-warning backup-btn">
+                            <i class="fas fa-database"></i> Backup
+                        </button>
+                        <button class="btn btn-info send-notification-btn">
+                            <i class="fas fa-bell"></i> Send Alert
                         </button>
                     </div>
                 </div>
@@ -553,7 +559,7 @@
                                 <i class="fas fa-users"></i>
                             </div>
                         </div>
-                        <div class="stat-value">127</div>
+                        <div class="stat-value" data-stat="totalUsers">127</div>
                         <div class="stat-label">Total Users</div>
                     </div>
 
@@ -563,7 +569,7 @@
                                 <i class="fas fa-file-alt"></i>
                             </div>
                         </div>
-                        <div class="stat-value">2,847</div>
+                        <div class="stat-value" data-stat="totalDocuments">2,847</div>
                         <div class="stat-label">Total Documents</div>
                     </div>
 
@@ -573,7 +579,7 @@
                                 <i class="fas fa-database"></i>
                             </div>
                         </div>
-                        <div class="stat-value">75%</div>
+                        <div class="stat-value" data-stat="storageUsed">75%</div>
                         <div class="stat-label">Storage Used</div>
                     </div>
 
@@ -583,7 +589,7 @@
                                 <i class="fas fa-chart-line"></i>
                             </div>
                         </div>
-                        <div class="stat-value">89</div>
+                        <div class="stat-value" data-stat="activeSessions">89</div>
                         <div class="stat-label">Active Sessions</div>
                     </div>
                 </div>
@@ -594,7 +600,7 @@
                     <div class="admin-card">
                         <div class="admin-card-header">
                             <h3><i class="fas fa-users"></i> User Management</h3>
-                            <button class="btn btn-sm btn-primary"
+                            <button class="btn btn-sm btn-primary add-user-btn"
                                 style="background: rgba(255,255,255,0.2); border: none;">
                                 <i class="fas fa-plus"></i> Add User
                             </button>
@@ -611,66 +617,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="user-info">
-                                                <div class="user-avatar">AU</div>
-                                                <div class="user-details">
-                                                    <h4>Admin User</h4>
-                                                    <p>admin@kmrl.com</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="role-badge role-admin">Admin</span></td>
-                                        <td><span class="status-badge status-active">Active</span></td>
-                                        <td>2 hours ago</td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn edit">Edit</button>
-                                                <button class="action-btn delete">Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="user-info">
-                                                <div class="user-avatar">MU</div>
-                                                <div class="user-details">
-                                                    <h4>Manager User</h4>
-                                                    <p>manager@kmrl.com</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="role-badge role-manager">Manager</span></td>
-                                        <td><span class="status-badge status-active">Active</span></td>
-                                        <td>5 hours ago</td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn edit">Edit</button>
-                                                <button class="action-btn delete">Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="user-info">
-                                                <div class="user-avatar">SU</div>
-                                                <div class="user-details">
-                                                    <h4>Staff User</h4>
-                                                    <p>staff@kmrl.com</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="role-badge role-staff">Staff</span></td>
-                                        <td><span class="status-badge status-active">Active</span></td>
-                                        <td>1 day ago</td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn edit">Edit</button>
-                                                <button class="action-btn delete">Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <!-- Users will be dynamically loaded -->
                                 </tbody>
                             </table>
                         </div>
@@ -683,19 +630,19 @@
                         </div>
                         <div class="admin-card-body">
                             <div class="status-grid">
-                                <div class="status-item online">
+                                <div class="status-item online" id="server-status">
                                     <h4>Server Status</h4>
                                     <span class="status-badge badge-online">Online</span>
                                 </div>
-                                <div class="status-item online">
+                                <div class="status-item online" id="database-status">
                                     <h4>Database</h4>
                                     <span class="status-badge badge-online">Connected</span>
                                 </div>
-                                <div class="status-item warning">
+                                <div class="status-item warning" id="storage-status">
                                     <h4>Storage</h4>
                                     <span class="status-badge badge-warning">75% Used</span>
                                 </div>
-                                <div class="status-item online">
+                                <div class="status-item online" id="backup-status">
                                     <h4>Backup</h4>
                                     <span class="status-badge badge-online">Up to date</span>
                                 </div>
@@ -712,6 +659,115 @@
                     </div>
                 </div>
 
+                <!-- Document Oversight Section -->
+                <div class="admin-sections">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3><i class="fas fa-file-alt"></i> Document Oversight</h3>
+                            <button class="btn btn-sm btn-secondary"
+                                style="background: rgba(255,255,255,0.2); border: none;">
+                                <i class="fas fa-chart-bar"></i> View All
+                            </button>
+                        </div>
+                        <div class="admin-card-body">
+                            <h5>Pending Approvals</h5>
+                            <div id="pendingDocuments">
+                                <!-- Pending documents will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Workflow Management -->
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3><i class="fas fa-sitemap"></i> Workflow Management</h3>
+                            <button class="btn btn-sm btn-secondary configure-workflow-btn"
+                                style="background: rgba(255,255,255,0.2); border: none;">
+                                <i class="fas fa-cog"></i> Configure
+                            </button>
+                        </div>
+                        <div class="admin-card-body">
+                            <div class="workflow-stats">
+                                <div class="workflow-item">
+                                    <span class="workflow-label">Default Approval Flow</span>
+                                    <span class="workflow-status active">Active</span>
+                                </div>
+                                <div class="workflow-item">
+                                    <span class="workflow-label">Department Workflows</span>
+                                    <span class="workflow-status">5 Configured</span>
+                                </div>
+                                <div class="workflow-item">
+                                    <span class="workflow-label">Auto-Notifications</span>
+                                    <span class="workflow-status active">Enabled</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security & Analytics Section -->
+                <div class="admin-sections">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3><i class="fas fa-shield-alt"></i> Security & Access Control</h3>
+                            <button class="btn btn-sm btn-warning"
+                                style="background: rgba(255,255,255,0.2); border: none;">
+                                <i class="fas fa-key"></i> Manage
+                            </button>
+                        </div>
+                        <div class="admin-card-body">
+                            <div class="security-grid">
+                                <div class="security-item">
+                                    <h5>Role-Based Access</h5>
+                                    <p>Configure permissions for each user role</p>
+                                    <button class="btn btn-sm btn-outline">Configure</button>
+                                </div>
+                                <div class="security-item">
+                                    <h5>AI Integration Settings</h5>
+                                    <p>Manage OCR and document summarization</p>
+                                    <button class="btn btn-sm btn-outline">Settings</button>
+                                </div>
+                                <div class="security-item">
+                                    <h5>Backup & Restore</h5>
+                                    <p>System backup and data recovery</p>
+                                    <button class="btn btn-sm btn-outline backup-btn">Backup Now</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Analytics -->
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3><i class="fas fa-chart-line"></i> System KPIs</h3>
+                            <button class="btn btn-sm btn-info analytics-btn"
+                                style="background: rgba(255,255,255,0.2); border: none;">
+                                <i class="fas fa-external-link-alt"></i> Full Report
+                            </button>
+                        </div>
+                        <div class="admin-card-body">
+                            <div class="kpi-grid">
+                                <div class="kpi-item">
+                                    <div class="kpi-value">94.2%</div>
+                                    <div class="kpi-label">Document Processing Rate</div>
+                                </div>
+                                <div class="kpi-item">
+                                    <div class="kpi-value">2.4s</div>
+                                    <div class="kpi-label">Avg. Response Time</div>
+                                </div>
+                                <div class="kpi-item">
+                                    <div class="kpi-value">127</div>
+                                    <div class="kpi-label">Active Users This Week</div>
+                                </div>
+                                <div class="kpi-item">
+                                    <div class="kpi-value">99.8%</div>
+                                    <div class="kpi-label">System Uptime</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- System Logs -->
                 <div class="admin-card logs-section">
                     <div class="admin-card-header">
@@ -722,51 +778,8 @@
                         </button>
                     </div>
                     <div class="admin-card-body">
-                        <div class="log-item">
-                            <div class="log-icon info">
-                                <i class="fas fa-info"></i>
-                            </div>
-                            <div class="log-content">
-                                <p class="log-message">User 'admin@kmrl.com' logged in successfully</p>
-                                <p class="log-time">2 hours ago</p>
-                            </div>
-                        </div>
-                        <div class="log-item">
-                            <div class="log-icon info">
-                                <i class="fas fa-upload"></i>
-                            </div>
-                            <div class="log-content">
-                                <p class="log-message">Document 'Financial_Report_Q4.pdf' uploaded by manager@kmrl.com
-                                </p>
-                                <p class="log-time">3 hours ago</p>
-                            </div>
-                        </div>
-                        <div class="log-item">
-                            <div class="log-icon warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="log-content">
-                                <p class="log-message">Storage usage reached 75% capacity</p>
-                                <p class="log-time">5 hours ago</p>
-                            </div>
-                        </div>
-                        <div class="log-item">
-                            <div class="log-icon info">
-                                <i class="fas fa-check"></i>
-                            </div>
-                            <div class="log-content">
-                                <p class="log-message">Automatic backup completed successfully</p>
-                                <p class="log-time">6 hours ago</p>
-                            </div>
-                        </div>
-                        <div class="log-item">
-                            <div class="log-icon error">
-                                <i class="fas fa-times"></i>
-                            </div>
-                            <div class="log-content">
-                                <p class="log-message">Failed login attempt from IP 192.168.1.100</p>
-                                <p class="log-time">8 hours ago</p>
-                            </div>
+                        <div id="systemLogs">
+                            <!-- System logs will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -775,6 +788,125 @@
     </div>
 
     <script src="js/common.js"></script>
+    <script src="js/admin.js"></script>
+
+    <style>
+        /* Additional Admin Panel Styles */
+        .pending-doc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .doc-info h6 {
+            margin: 0 0 0.25rem 0;
+            color: #1e293b;
+        }
+
+        .doc-info p {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.85rem;
+        }
+
+        .doc-info small {
+            color: #64748b;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .workflow-stats {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .workflow-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+        }
+
+        .workflow-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .workflow-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .workflow-status.active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .security-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .security-item {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        .security-item h5 {
+            margin: 0 0 0.5rem 0;
+            color: #374151;
+        }
+
+        .security-item p {
+            margin: 0 0 1rem 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .kpi-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </body>
 
 </html>
