@@ -2,7 +2,7 @@
 
 class KMRLAIAssistant {
     constructor() {
-        this.apiKey = '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';
+        this.apiKey = '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';
         this.apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
         this.isOpen = false;
         this.chatHistory = [];

@@ -7,6 +7,11 @@ class AIService {
     constructor() {
         this.openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
+            baseURL: 'https://openrouter.ai/api/v1',
+            defaultHeaders: {
+                "HTTP-Referer": "https://kmrl-docs.local",
+                "X-Title": "KMRL Document Management System"
+            }
         });
     }
 
@@ -23,14 +28,16 @@ Category: ${tender.category}
 
 Summary:`;
 
-            const response = await this.openai.completions.create({
-                model: "text-davinci-003",
-                prompt: prompt,
+            const response = await this.openai.chat.completions.create({
+                model: "microsoft/wizardlm-2-8x22b",
+                messages: [
+                    { role: "user", content: prompt }
+                ],
                 max_tokens: 150,
                 temperature: 0.3,
             });
 
-            return response.choices[0].text.trim();
+            return response.choices[0].message.content.trim();
         } catch (error) {
             console.error('Error summarizing tender:', error);
             // Return a default summary if AI fails
@@ -59,14 +66,16 @@ Keywords: ${tender.keywords.join(', ')}
 
 Department:`;
 
-            const response = await this.openai.completions.create({
-                model: "text-davinci-003",
-                prompt: prompt,
+            const response = await this.openai.chat.completions.create({
+                model: "microsoft/wizardlm-2-8x22b",
+                messages: [
+                    { role: "user", content: prompt }
+                ],
                 max_tokens: 20,
                 temperature: 0.1,
             });
 
-            const department = response.choices[0].text.trim();
+            const department = response.choices[0].message.content.trim();
 
             // Validate the department
             const validDepartments = ['Infrastructure', 'Electrical', 'Mechanical', 'Civil', 'Technology', 'Maintenance', 'Safety', 'Other'];
@@ -93,14 +102,16 @@ Description: ${tender.description}
 
 Keywords (comma separated):`;
 
-            const response = await this.openai.completions.create({
-                model: "text-davinci-003",
-                prompt: prompt,
+            const response = await this.openai.chat.completions.create({
+                model: "microsoft/wizardlm-2-8x22b",
+                messages: [
+                    { role: "user", content: prompt }
+                ],
                 max_tokens: 100,
                 temperature: 0.3,
             });
 
-            const keywordsText = response.choices[0].text.trim();
+            const keywordsText = response.choices[0].message.content.trim();
             return keywordsText.split(',').map(keyword => keyword.trim()).filter(keyword => keyword.length > 0);
         } catch (error) {
             console.error('Error extracting keywords:', error);
@@ -127,14 +138,16 @@ Keywords: ${tender.keywords.join(', ')}
 
 Priority:`;
 
-            const response = await this.openai.completions.create({
-                model: "text-davinci-003",
-                prompt: prompt,
+            const response = await this.openai.chat.completions.create({
+                model: "microsoft/wizardlm-2-8x22b",
+                messages: [
+                    { role: "user", content: prompt }
+                ],
                 max_tokens: 10,
                 temperature: 0.1,
             });
 
-            const priority = response.choices[0].text.trim().toLowerCase();
+            const priority = response.choices[0].message.content.trim().toLowerCase();
 
             // Validate the priority
             const validPriorities = ['urgent', 'high', 'medium', 'low'];
