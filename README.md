@@ -10,7 +10,8 @@ A comprehensive web-based document management system built with HTML, CSS, and J
 - **Document Management**: Search, filter, and organize documents efficiently
 - **Analytics Dashboard**: Visual insights and reporting with Chart.js
 - **Responsive Design**: Mobile-friendly interface that works on all devices
-- **AI Assistant**: Chatbot for user guidance and support
+- **AI Assistant**: Intelligent chat-based help system for comprehensive user support
+- **Real-time Assistance**: Context-aware AI guidance for all system operations
 
 ### User Roles & Permissions
 
@@ -40,6 +41,8 @@ This system has been enhanced with a backend architecture for automated tender t
 - **Automated Portal Monitoring**: Scans government and private tender portals
 - **Real-time Notifications**: WebSocket-based instant alerts
 - **AI Integration**: Tender summarization and categorization
+- **AI Assistant**: Comprehensive intelligent help system for user guidance
+- **Document Intelligence**: AI-powered document analysis and categorization
 - **Email Notifications**: SMTP-based email alerts
 - **Data Persistence**: MongoDB database storage
 - **RESTful API**: Backend services for frontend integration
@@ -57,6 +60,7 @@ KMRL2/
 │   ├── upload.js               # File upload handling
 │   ├── documents.js            # Document management
 │   ├── api-client.js           # API client for backend communication
+│   ├── ai-assistant.js         # Comprehensive AI assistant system
 │   └── ...                     # Other JavaScript files
 ├── models/                     # Mongoose models for MongoDB
 ├── services/                   # Backend services
@@ -68,6 +72,7 @@ KMRL2/
 ├── documents.html              # Document management
 ├── analytics.html              # Analytics and reporting
 ├── admin.html                  # Admin panel
+├── ai-demo.html                # AI Assistant demonstration page
 ├── server.js                   # Main backend server
 ├── README.md                   # This file
 └── README_BACKEND.md           # Backend architecture documentation
@@ -255,5 +260,6 @@ The system includes demo accounts for testing:
 
 For detailed information about the backend architecture, see:
 - [README_BACKEND.md](README_BACKEND.md) - Backend architecture documentation
+- [README_AI_ASSISTANT.md](README_AI_ASSISTANT.md) - AI Assistant integration guide
 - [SYSTEM_INTEGRATION_GUIDE.md](SYSTEM_INTEGRATION_GUIDE.md) - Integration guide
 - [SYSTEM_VALIDATION_GUIDE.md](SYSTEM_VALIDATION_GUIDE.md) - Validation guide

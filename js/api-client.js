@@ -184,6 +184,63 @@ class APIClient {
             return null;
         }
     }
+
+    // AI Assistant Integration
+    async getAIResponse(message, context = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}/ai/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    context: context,
+                    user: this.getCurrentUser()
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error getting AI response:', error);
+            return null;
+        }
+    }
+
+    async analyzeDocument(file) {
+        try {
+            const formData = new FormData();
+            formData.append('document', file);
+
+            const response = await fetch(`${this.baseURL}/ai/analyze-document`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error analyzing document:', error);
+            return null;
+        }
+    }
+
+    getCurrentUser() {
+        try {
+            const userData = localStorage.getItem('kmrl_user');
+            return userData ? JSON.parse(userData) : null;
+        } catch (error) {
+            console.error('Error getting user data:', error);
+            return null;
+        }
+    }
 }
 
 // Initialize API client

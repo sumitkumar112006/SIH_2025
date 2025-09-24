@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant Demo - KMRL Document Management System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        @media (min-width: 768px) {
+            .demo-container {
+                padding: 2rem;
+            }
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (min-width: 768px) {
+            .demo-header {
+                margin-bottom: 3rem;
+                padding: 2rem;
+            }
+        }
+
+        .demo-header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .demo-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        .demo-header p {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .demo-header p {
+                font-size: 1.2rem;
+            }
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .demo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .demo-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 2rem;
+                margin-bottom: 3rem;
+            }
+        }
+
+        .demo-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            min-height: 280px;
+        }
+
+        @media (min-width: 768px) {
+            .demo-card {
+                padding: 2rem;
+            }
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .demo-card h3 {
+            color: #2563eb;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        @media (min-width: 768px) {
+            .demo-card h3 {
+                font-size: 1.25rem;
+            }
+        }
+
+        .demo-examples {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+
+        .demo-examples li {
+            background: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid #2563eb;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        @media (min-width: 768px) {
+            .demo-examples li {
+                font-size: 1rem;
+            }
+        }
+
+        .demo-examples li:hover {
+            background: #eff6ff;
+            transform: translateX(5px);
+        }
+
+        .ai-launch-section {
+            text-align: center;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .ai-launch-section {
+                padding: 3rem;
+            }
+        }
+
+        .ai-launch-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .ai-launch-section h2 {
+                font-size: 2rem;
+            }
+        }
+
+        .ai-launch-section p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .ai-launch-section p {
+                font-size: 1.1rem;
+            }
+        }
+
+        .launch-btn {
+            background: white;
+            color: #2563eb;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            display: inline-block;
+            min-width: 140px;
+        }
+
+        @media (min-width: 768px) {
+            .launch-btn {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+                border-radius: 2rem;
+                margin: 1rem;
+                min-width: 160px;
+            }
+        }
+
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .features-showcase {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (min-width: 640px) {
+            .features-showcase {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .features-showcase {
+                grid-template-columns: repeat(4, 1fr);
+                margin: 2rem 0;
+            }
+        }
+
+        .feature-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .feature-item {
+                padding: 1.5rem;
+            }
+        }
+
+        .feature-item:hover {
+            border-color: #2563eb;
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.1);
+        }
+
+        .feature-item h4 {
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .feature-item h4 {
+                font-size: 1rem;
+            }
+        }
+
+        .feature-item p {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        @media (min-width: 768px) {
+            .feature-item p {
+                font-size: 0.9rem;
+            }
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .feature-icon {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        .navigation-bar {
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .navigation-bar {
+                padding: 1rem 2rem;
+                margin-bottom: 2rem;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 0;
+            }
+        }
+
+        .navigation-bar .logo h3 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .navigation-bar .logo h3 {
+                font-size: 1.25rem;
+                text-align: left;
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                justify-content: flex-end;
+            }
+        }
+
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .nav-links a {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        .nav-links a:hover {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        @media (max-width: 767px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .navigation-bar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .nav-links a {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .demo-card {
+                padding: 1rem;
+                min-height: auto;
+            }
+
+            .demo-card h3 {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .ai-launch-section {
+                padding: 1.5rem;
+            }
+
+            .ai-launch-section h2 {
+                font-size: 1.25rem;
+            }
+
+            .launch-btn {
+                display: block;
+                width: 100%;
+                max-width: 280px;
+                margin: 0.5rem auto;
+                font-size: 0.95rem;
+                padding: 0.75rem 1rem;
+            }
+
+            .features-showcase {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .feature-item {
+                padding: 1rem;
+            }
+
+            .feature-item h4 {
+                font-size: 0.85rem;
+            }
+
+            .feature-item p {
+                font-size: 0.8rem;
+            }
+
+            .demo-header {
+                padding: 1rem;
+            }
+
+            .demo-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .demo-header p {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 640px) and (max-width: 1023px) {
+            .features-showcase {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .demo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .launch-btn {
+                display: inline-block;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Navigation -->
+        <div class="navigation-bar">
+            <div class="logo">
+                <h3><i class="fas fa-robot"></i> KMRL AI Assistant Demo</h3>
+            </div>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="demo-header">
+            <h1><i class="fas fa-robot"></i> KMRL AI Assistant</h1>
+            <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 1.5rem;">
+                Experience intelligent assistance for document management and system operations
+            </p>
+            <div class="features-showcase">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-upload"></i></div>
+                    <h4>Upload Guidance</h4>
+                    <p>Step-by-step help with document uploads</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-search"></i></div>
+                    <h4>Search Assistance</h4>
+                    <p>Find documents quickly with AI guidance</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-gavel"></i></div>
+                    <h4>Tender Tracking</h4>
+                    <p>Understand tender monitoring features</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-info-circle"></i></div>
+                    <h4>Project Information</h4>
+                    <p>Learn about KMRL's system purpose</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Examples -->
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h3><i class="fas fa-upload"></i> Document Upload Help</h3>
+                <p>Try asking the AI about document management:</p>
+                <ul class="demo-examples">
+                    <li onclick="askAI('How do I upload documents?')">How do I upload documents?</li>
+                    <li onclick="askAI('What file formats are supported?')">What file formats are supported?</li>
+                    <li onclick="askAI('How do I add metadata to documents?')">How do I add metadata to documents?</li>
+                    <li onclick="askAI('Can I upload multiple files at once?')">Can I upload multiple files at once?</li>
+                </ul>
+            </div>
+
+            <div class="demo-card">
+                <h3><i class="fas fa-search"></i> Search & Navigation</h3>
+                <p>Get help with finding and managing documents:</p>
+                <ul class="demo-examples">
+                    <li onclick="askAI('How do I search for documents?')">How do I search for documents?</li>
+                    <li onclick="askAI('How do I filter documents by category?')">How do I filter documents by category?</li>
+                    <li onclick="askAI('Where can I see my recent uploads?')">Where can I see my recent uploads?</li>
+                    <li onclick="askAI('How do I organize my documents?')">How do I organize my documents?</li>
+                </ul>
+            </div>
+
+            <div class="demo-card">
+                <h3><i class="fas fa-gavel"></i> Tender Tracking</h3>
+                <p>Learn about automated tender monitoring:</p>
+                <ul class="demo-examples">
+                    <li onclick="askAI('What is the tender tracking system?')">What is the tender tracking system?</li>
+                    <li onclick="askAI('How do I get tender notifications?')">How do I get tender notifications?</li>
+                    <li onclick="askAI('Which portals are monitored?')">Which portals are monitored?</li>
+                    <li onclick="askAI('How are tenders categorized?')">How are tenders categorized?</li>
+                </ul>
+            </div>
+
+            <div class="demo-card">
+                <h3><i class="fas fa-info-circle"></i> Project Information</h3>
+                <p>Understand the KMRL system purpose and features:</p>
+                <ul class="demo-examples">
+                    <li onclick="askAI('What is the purpose of this project?')">What is the purpose of this project?</li>
+                    <li onclick="askAI('What are the main features of KMRL?')">What are the main features of KMRL?</li>
+                    <li onclick="askAI('Who can use this system?')">Who can use this system?</li>
+                    <li onclick="askAI('How does role-based access work?')">How does role-based access work?</li>
+                </ul>
+            </div>
+
+            <div class="demo-card">
+                <h3><i class="fas fa-chart-bar"></i> Analytics & Reports</h3>
+                <p>Get insights about system analytics:</p>
+                <ul class="demo-examples">
+                    <li onclick="askAI('How do I view analytics?')">How do I view analytics?</li>
+                    <li onclick="askAI('What reports are available?')">What reports are available?</li>
+                    <li onclick="askAI('How do I export data?')">How do I export data?</li>
+                    <li onclick="askAI('What metrics are tracked?')">What metrics are tracked?</li>
+                </ul>
+            </div>
+
+            <div class="demo-card">
+                <h3><i class="fas fa-cog"></i> System Administration</h3>
+                <p>Administrative functions and user management:</p>
+                <ul class="demo-examples">
+                    <li onclick="askAI('How do I manage users?')">How do I manage users?</li>
+                    <li onclick="askAI('What are the different user roles?')">What are the different user roles?</li>
+                    <li onclick="askAI('How do I configure notifications?')">How do I configure notifications?</li>
+                    <li onclick="askAI('How do I monitor system health?')">How do I monitor system health?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Launch AI Assistant -->
+        <div class="ai-launch-section">
+            <h2><i class="fas fa-rocket"></i> Launch AI Assistant</h2>
+            <p>Click the button below to start chatting with the KMRL AI Assistant</p>
+            <button class="launch-btn" onclick="launchAI()">
+                <i class="fas fa-robot"></i> Start AI Chat
+            </button>
+            <button class="launch-btn" onclick="goToDashboard()">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </button>
+        </div>
+
+        <!-- Features List -->
+        <div class="demo-card" style="grid-column: 1/-1;">
+            <h3><i class="fas fa-star"></i> AI Assistant Capabilities</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div>
+                    <h4><i class="fas fa-brain"></i> Intelligent Responses</h4>
+                    <p>Powered by advanced AI to provide contextual and helpful responses</p>
+                </div>
+                <div>
+                    <h4><i class="fas fa-clock"></i> Real-time Support</h4>
+                    <p>Get instant answers to your questions without waiting</p>
+                </div>
+                <div>
+                    <h4><i class="fas fa-book"></i> System Knowledge</h4>
+                    <p>Comprehensive understanding of KMRL system features and workflows</p>
+                </div>
+                <div>
+                    <h4><i class="fas fa-mobile-alt"></i> Always Available</h4>
+                    <p>Access AI assistance from any page in the system</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include AI Assistant -->
+    <script>
+        // Simple localStorage user for demo
+        if (!localStorage.getItem('kmrl_user')) {
+            localStorage.setItem('kmrl_user', JSON.stringify({
+                name: 'Demo User',
+                role: 'staff',
+                email: 'demo@kmrl.com'
+            }));
+        }
+
+        function askAI(question) {
+            // Launch AI assistant and ask the question
+            if (window.aiAssistant) {
+                window.aiAssistant.open();
+                setTimeout(() => {
+                    window.aiAssistant.sendMessage(question);
+                }, 500);
+            } else {
+                alert('AI Assistant is loading... Please try again in a moment.');
+            }
+        }
+
+        function launchAI() {
+            if (window.aiAssistant) {
+                window.aiAssistant.open();
+            } else {
+                alert('AI Assistant is loading... Please try again in a moment.');
+            }
+        }
+
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Show loading message
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingToast = document.createElement('div');
+            loadingToast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #2563eb;
+                color: white;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                z-index: 9999;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            loadingToast.innerHTML = '<i class="fas fa-robot"></i> AI Assistant is initializing...';
+            document.body.appendChild(loadingToast);
+            
+            setTimeout(() => loadingToast.style.opacity = '1', 100);
+            setTimeout(() => {
+                loadingToast.innerHTML = '<i class="fas fa-check"></i> AI Assistant ready!';
+                setTimeout(() => {
+                    loadingToast.style.opacity = '0';
+                    setTimeout(() => loadingToast.remove(), 300);
+                }, 2000);
+            }, 2000);
+        });
+    </script>
+    <script src="js/ai-assistant.js"></script>
+</body>
+</html>
