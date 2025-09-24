@@ -108,7 +108,7 @@ The system monitors multiple portals simultaneously:
 - Source portal filtering
 
 **Smart Recommendations:**
-- AI-powered tender matching
+- Advanced tender matching
 - Historical analysis
 - Success rate predictions
 - Competition analysis

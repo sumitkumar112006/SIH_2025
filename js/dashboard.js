@@ -3,204 +3,301 @@
 class DashboardManager {
     constructor() {
         this.init();
+    }
+
+    init() {
+        // Initialize dynamic sample data
+        this.initializeDynamicSampleData();
         this.loadDashboardData();
         this.setupEventListeners();
         this.startAutoRefresh();
     }
 
-    init() {
-        // Initialize dashboard
-        this.currentUser = this.getCurrentUser();
-        this.setupRoleBasedView();
-        this.setupChatbot();
-    }
+    initializeDynamicSampleData() {
+        // Check if we need to generate new sample data (based on timestamp)
+        const lastDataGen = localStorage.getItem('kmrl_last_data_gen');
+        const now = new Date().getTime();
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
 
-    getCurrentUser() {
-        try {
-            const userData = localStorage.getItem('kmrl_user');
-            return userData ? JSON.parse(userData) : null;
-        } catch (error) {
-            console.error('Error getting user data:', error);
-            return null;
+        // Generate new data if it's the first time or if an hour has passed
+        if (!lastDataGen || (now - parseInt(lastDataGen)) > oneHour) {
+            this.generateDynamicSampleData();
+            localStorage.setItem('kmrl_last_data_gen', now.toString());
         }
     }
 
-    setupRoleBasedView() {
-        if (!this.currentUser) return;
+    generateDynamicSampleData() {
+        // Generate realistic document data that changes over time
+        const documentCount = Math.floor(Math.random() * 50) + 100; // Between 100-150 documents
+        const sampleDocuments = [];
 
-        const role = this.currentUser.role;
+        // Document categories
+        const categories = ['financial', 'hr', 'projects', 'it', 'marketing', 'legal', 'operations'];
+        const statuses = ['approved', 'pending', 'rejected'];
+        const users = ['Admin User', 'Manager User', 'Staff User', 'Director User', 'Supervisor User'];
 
-        // Show/hide elements based on role
-        const adminElements = document.querySelectorAll('.admin-only');
-        adminElements.forEach(el => {
-            el.style.display = role === 'admin' ? 'block' : 'none';
-        });
+        // Generate documents with realistic timestamps
+        for (let i = 0; i < documentCount; i++) {
+            // Random category
+            const category = categories[Math.floor(Math.random() * categories.length)];
 
-        const managerElements = document.querySelectorAll('.manager-only');
-        managerElements.forEach(el => {
-            el.style.display = ['admin', 'manager'].includes(role) ? 'block' : 'none';
-        });
+            // Random status with weighted probability (more approved, some pending, few rejected)
+            let status;
+            const statusRand = Math.random();
+            if (statusRand < 0.7) status = 'approved';
+            else if (statusRand < 0.9) status = 'pending';
+            else status = 'rejected';
+
+            // Random user
+            const user = users[Math.floor(Math.random() * users.length)];
+
+            // Random file size (100KB to 10MB)
+            const fileSize = Math.floor(Math.random() * 10000000) + 100000;
+
+            // Random date within the last 30 days
+            const daysAgo = Math.floor(Math.random() * 30);
+            const uploadDate = new Date();
+            uploadDate.setDate(uploadDate.getDate() - daysAgo);
+            uploadDate.setHours(Math.floor(Math.random() * 24));
+            uploadDate.setMinutes(Math.floor(Math.random() * 60));
+
+            // Random views and downloads
+            const views = Math.floor(Math.random() * 100);
+            const downloads = Math.floor(Math.random() * views * 0.7); // Downloads should be less than views
+
+            sampleDocuments.push({
+                id: `doc_${i + 1}`,
+                title: this.generateDocumentTitle(category),
+                category: category,
+                files: [{
+                    name: `document_${i + 1}.${this.getFileExtension(category)}`,
+                    size: fileSize,
+                    type: this.getFileType(category)
+                }],
+                uploadedAt: uploadDate.toISOString(),
+                uploadedBy: user,
+                status: status,
+                downloads: downloads,
+                views: views
+            });
+        }
+
+        localStorage.setItem('kmrl_documents', JSON.stringify(sampleDocuments));
+
+        // Generate sample users
+        const sampleUsers = [
+            {
+                id: 'user_1',
+                name: 'Admin User',
+                email: 'admin@kmrl.com',
+                role: 'admin',
+                department: 'Administration'
+            },
+            {
+                id: 'user_2',
+                name: 'Manager User',
+                email: 'manager@kmrl.com',
+                role: 'manager',
+                department: 'Operations'
+            },
+            {
+                id: 'user_3',
+                name: 'Staff User',
+                email: 'staff@kmrl.com',
+                role: 'staff',
+                department: 'Operations'
+            },
+            {
+                id: 'user_4',
+                name: 'Director User',
+                email: 'director@kmrl.com',
+                role: 'manager',
+                department: 'Finance'
+            },
+            {
+                id: 'user_5',
+                name: 'Supervisor User',
+                email: 'supervisor@kmrl.com',
+                role: 'staff',
+                department: 'HR'
+            }
+        ];
+
+        localStorage.setItem('kmrl_users', JSON.stringify(sampleUsers));
+
+        // Set a default user for testing
+        const defaultUser = sampleUsers[2]; // Staff User
+        localStorage.setItem('kmrl_user', JSON.stringify(defaultUser));
     }
 
-    setupEventListeners() {
-        // Refresh button
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'refreshDashboard') {
-                this.loadDashboardData();
-            }
-        });
+    generateDocumentTitle(category) {
+        const titles = {
+            'financial': ['Q1 Financial Report', 'Budget Analysis', 'Expense Report', 'Revenue Forecast', 'Investment Summary'],
+            'hr': ['Employee Handbook', 'Policy Update', 'Training Manual', 'Performance Review', 'Recruitment Plan'],
+            'projects': ['Project Status Update', 'Milestone Report', 'Risk Assessment', 'Timeline Adjustment', 'Resource Allocation'],
+            'it': ['Security Policy', 'System Upgrade Plan', 'Network Diagram', 'Backup Procedure', 'Access Control'],
+            'marketing': ['Campaign Strategy', 'Market Analysis', 'Customer Survey', 'Brand Guidelines', 'Promotion Plan'],
+            'legal': ['Contract Review', 'Compliance Report', 'Legal Opinion', 'Regulatory Update', 'Case Summary'],
+            'operations': ['Process Manual', 'SOP Update', 'Quality Check', 'Maintenance Schedule', 'Inventory Report']
+        };
 
-        // Widget interactions
-        document.querySelectorAll('.widget').forEach(widget => {
-            widget.addEventListener('click', (e) => {
-                const widgetType = widget.dataset.type;
-                if (widgetType) {
-                    this.handleWidgetClick(widgetType);
-                }
-            });
-        });
+        const categoryTitles = titles[category] || ['General Document'];
+        return categoryTitles[Math.floor(Math.random() * categoryTitles.length)] + ' ' + new Date().getFullYear();
+    }
+
+    getFileExtension(category) {
+        const extensions = {
+            'financial': 'xlsx',
+            'hr': 'docx',
+            'projects': 'pptx',
+            'it': 'pdf',
+            'marketing': 'pptx',
+            'legal': 'pdf',
+            'operations': 'docx'
+        };
+        return extensions[category] || 'pdf';
+    }
+
+    getFileType(category) {
+        const types = {
+            'financial': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'hr': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'projects': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'it': 'application/pdf',
+            'marketing': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'legal': 'application/pdf',
+            'operations': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        };
+        return types[category] || 'application/pdf';
     }
 
     async loadDashboardData() {
+        this.showLoadingState();
+
         try {
-            // Show loading state
-            this.showLoadingState();
+            // Simulate API call delay
+            await this.delay(800 + Math.random() * 400); // Random delay between 800-1200ms
 
-            // Simulate API calls to load dashboard data
-            const [stats, recentActivity] = await Promise.all([
-                this.loadStatistics(),
-                this.loadRecentActivity()
-            ]);
+            // Get data from localStorage
+            const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+            const users = JSON.parse(localStorage.getItem('kmrl_users') || '[]');
 
-            // Update UI with loaded data
-            this.updateStatistics(stats);
-            this.updateRecentActivity(recentActivity);
+            // Calculate statistics with some randomness to make values change
+            const stats = {
+                totalDocuments: documents.length,
+                recentUploads: this.getRecentUploads(documents),
+                pendingApprovals: documents.filter(doc => doc.status === 'pending').length,
+                storageUsed: this.calculateStorageUsed(documents)
+            };
 
-            // Hide loading state
+            // Add slight variations to make the numbers look more dynamic
+            stats.totalDocuments = Math.max(0, stats.totalDocuments + Math.floor(Math.random() * 10) - 5);
+            stats.recentUploads = Math.max(0, stats.recentUploads + Math.floor(Math.random() * 5) - 2);
+            stats.pendingApprovals = Math.max(0, stats.pendingApprovals + Math.floor(Math.random() * 3) - 1);
+
+            // Update UI
+            this.updateStats(stats);
+            this.updateRecentActivity(documents);
             this.hideLoadingState();
 
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             this.showError('Failed to load dashboard data');
+            this.hideLoadingState();
         }
     }
 
-    async loadStatistics() {
-        // Simulate API delay
-        await this.delay(1000);
+    getRecentUploads(documents) {
+        // Get documents uploaded in the last 7 days
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        // Generate mock statistics based on user role
-        const baseStats = {
-            totalDocs: Math.floor(Math.random() * 1000) + 500,
-            recentUploads: Math.floor(Math.random() * 50) + 10,
-            pendingApprovals: Math.floor(Math.random() * 20) + 5,
-            storageUsed: Math.floor(Math.random() * 80) + 20
-        };
+        return documents.filter(doc => {
+            const uploadDate = new Date(doc.uploadedAt || doc.createdAt || new Date());
+            return uploadDate >= oneWeekAgo;
+        }).length;
+    }
 
-        // Adjust stats based on user role
-        if (this.currentUser?.role === 'staff') {
-            baseStats.totalDocs = Math.floor(baseStats.totalDocs * 0.3);
-            baseStats.pendingApprovals = Math.floor(baseStats.pendingApprovals * 0.2);
+    calculateStorageUsed(documents) {
+        // Calculate total storage used in GB with some variation
+        let totalSize = 0;
+        documents.forEach(doc => {
+            // Handle different possible file size properties
+            const fileSize = doc.fileSize || (doc.files && doc.files[0] && doc.files[0].size) || 0;
+            totalSize += fileSize;
+        });
+
+        // Convert bytes to GB and add some random variation to make it look dynamic
+        const baseGB = totalSize / (1024 * 1024 * 1024);
+        const variation = (Math.random() * 0.5) - 0.25; // -0.25 to +0.25 variation
+        const gbUsed = Math.max(0, baseGB + variation);
+
+        return gbUsed.toFixed(1);
+    }
+
+    updateStats(stats) {
+        // Update total documents
+        const totalDocsElement = document.getElementById('totalDocs');
+        if (totalDocsElement) {
+            this.animateNumber(totalDocsElement, stats.totalDocuments);
         }
 
-        return baseStats;
-    }
-
-    async loadRecentActivity() {
-        // Simulate API delay
-        await this.delay(800);
-
-        const activities = [
-            {
-                type: 'upload',
-                title: 'New document uploaded',
-                description: 'Project_Report_2024.pdf',
-                time: '2 minutes ago',
-                icon: 'fas fa-upload',
-                iconColor: '#059669'
-            },
-            {
-                type: 'approval',
-                title: 'Document approved',
-                description: 'Financial_Statement.xlsx',
-                time: '15 minutes ago',
-                icon: 'fas fa-check-circle',
-                iconColor: '#2563eb'
-            },
-            {
-                type: 'comment',
-                title: 'New comment added',
-                description: 'Marketing_Strategy.docx',
-                time: '1 hour ago',
-                icon: 'fas fa-comment',
-                iconColor: '#d97706'
-            },
-            {
-                type: 'download',
-                title: 'Document downloaded',
-                description: 'Employee_Handbook.pdf',
-                time: '2 hours ago',
-                icon: 'fas fa-download',
-                iconColor: '#7c3aed'
-            },
-            {
-                type: 'share',
-                title: 'Document shared',
-                description: 'Quarterly_Review.pptx',
-                time: '3 hours ago',
-                icon: 'fas fa-share',
-                iconColor: '#059669'
-            }
-        ];
-
-        // Filter activities based on user role
-        if (this.currentUser?.role === 'staff') {
-            return activities.filter(activity =>
-                ['upload', 'download', 'comment'].includes(activity.type)
-            ).slice(0, 3);
+        // Update recent uploads
+        const recentUploadsElement = document.getElementById('recentUploads');
+        if (recentUploadsElement) {
+            this.animateNumber(recentUploadsElement, stats.recentUploads);
         }
 
-        return activities;
+        // Update pending approvals
+        const pendingApprovalsElement = document.getElementById('pendingApprovals');
+        if (pendingApprovalsElement) {
+            this.animateNumber(pendingApprovalsElement, stats.pendingApprovals);
+        }
+
+        // Update storage used
+        const storageUsedElement = document.getElementById('storageUsed');
+        if (storageUsedElement) {
+            storageUsedElement.textContent = `${stats.storageUsed} GB`;
+        }
     }
 
-    updateStatistics(stats) {
-        // Update widget values with animation
-        this.animateCounter('totalDocs', stats.totalDocs);
-        this.animateCounter('recentUploads', stats.recentUploads);
-        this.animateCounter('pendingApprovals', stats.pendingApprovals);
-        this.animateCounter('storageUsed', stats.storageUsed);
-    }
+    updateRecentActivity(documents) {
+        const recentActivityContainer = document.getElementById('recentActivity');
+        if (!recentActivityContainer) return;
 
-    updateRecentActivity(activities) {
-        const container = document.getElementById('recentActivity');
-        if (!container) return;
+        // Sort by upload date (newest first) and get top 5
+        const recentDocs = [...documents]
+            .sort((a, b) => new Date(b.uploadedAt || b.createdAt || new Date()) - new Date(a.uploadedAt || a.createdAt || new Date()))
+            .slice(0, 5);
 
-        container.innerHTML = '';
-
-        activities.forEach(activity => {
-            const activityElement = document.createElement('div');
-            activityElement.className = 'activity-item';
-            activityElement.innerHTML = `
-                <div class="activity-icon" style="background-color: ${activity.iconColor}20; color: ${activity.iconColor};">
-                    <i class="${activity.icon}"></i>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-title">${activity.title}</div>
-                    <div class="activity-description">${activity.description}</div>
-                    <div class="activity-time">${activity.time}</div>
+        if (recentDocs.length === 0) {
+            recentActivityContainer.innerHTML = `
+                <div class="no-activity">
+                    <i class="fas fa-history"></i>
+                    <p>No recent activity</p>
                 </div>
             `;
+            return;
+        }
 
-            container.appendChild(activityElement);
-        });
+        const activityHTML = recentDocs.map(doc => `
+            <div class="activity-item">
+                <div class="activity-icon" style="background-color: #2563eb;">
+                    <i class="fas fa-file-upload"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">${doc.title || doc.name || 'Untitled Document'} uploaded</div>
+                    <div class="activity-time">${new Date(doc.uploadedAt || doc.createdAt || new Date()).toLocaleString()}</div>
+                </div>
+            </div>
+        `).join('');
+
+        recentActivityContainer.innerHTML = activityHTML;
     }
 
-    animateCounter(elementId, targetValue) {
-        const element = document.getElementById(elementId);
-        if (!element) return;
-
+    animateNumber(element, targetValue) {
         const startValue = 0;
-        const duration = 2000;
+        const duration = 1500 + Math.random() * 500; // Random duration between 1500-2000ms
         const startTime = performance.now();
 
         const animate = (currentTime) => {
@@ -235,6 +332,9 @@ class DashboardManager {
     showError(message) {
         if (window.showNotification) {
             window.showNotification(message, 'error');
+        } else {
+            // Fallback for when notification system isn't available
+            alert(message);
         }
     }
 
@@ -253,186 +353,51 @@ class DashboardManager {
     }
 
     startAutoRefresh() {
-        // Auto-refresh dashboard data every 5 minutes
+        // Auto-refresh dashboard data every 5 minutes (300,000 ms)
         setInterval(() => {
             this.loadDashboardData();
         }, 300000);
     }
 
-    // Chatbot functionality
-    setupChatbot() {
-        this.chatbotResponses = [
-            "I can help you manage your documents more efficiently!",
-            "Would you like to know about document upload procedures?",
-            "I can assist with search and filtering your documents.",
-            "Need help with document approval workflows?",
-            "I can explain the analytics and reporting features.",
-            "Would you like tips for organizing your documents?",
-            "I can help you understand user permissions and access.",
-            "Let me know if you need assistance with any features!"
-        ];
-
-        // Setup chatbot input handler
-        const chatbotInput = document.getElementById('chatbotInput');
-        if (chatbotInput) {
-            chatbotInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.sendMessage();
-                }
-            });
-        }
-    }
-
-    openChatbot() {
-        const chatbot = document.getElementById('chatbot');
-        if (chatbot) {
-            chatbot.style.display = 'block';
-            chatbot.style.position = 'fixed';
-            chatbot.style.bottom = '20px';
-            chatbot.style.right = '20px';
-            chatbot.style.width = '350px';
-            chatbot.style.height = '500px';
-            chatbot.style.backgroundColor = 'white';
-            chatbot.style.borderRadius = '10px';
-            chatbot.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
-            chatbot.style.zIndex = '1000';
-            chatbot.style.border = '1px solid #e5e7eb';
-
-            document.getElementById('chatbotInput')?.focus();
-        }
-    }
-
-    closeChatbot() {
-        const chatbot = document.getElementById('chatbot');
-        if (chatbot) {
-            chatbot.style.display = 'none';
-        }
-    }
-
-    async sendMessage() {
-        const input = document.getElementById('chatbotInput');
-        const messagesContainer = document.getElementById('chatbotMessages');
-
-        if (!input || !messagesContainer) return;
-
-        const message = input.value.trim();
-        if (!message) return;
-
-        // Add user message
-        this.addChatMessage(message, 'user');
-        input.value = '';
-
-        // Show typing indicator
-        this.showTypingIndicator();
-
-        // Simulate AI response delay
-        await this.delay(1000 + Math.random() * 2000);
-
-        // Remove typing indicator
-        this.hideTypingIndicator();
-
-        // Add bot response
-        const response = this.generateBotResponse(message);
-        this.addChatMessage(response, 'bot');
-    }
-
-    addChatMessage(message, sender) {
-        const messagesContainer = document.getElementById('chatbotMessages');
-        if (!messagesContainer) return;
-
-        const messageElement = document.createElement('div');
-        messageElement.className = `message ${sender}-message`;
-
-        if (sender === 'bot') {
-            messageElement.innerHTML = `
-                <i class="fas fa-robot"></i>
-                <span>${message}</span>
-            `;
-        } else {
-            messageElement.innerHTML = `
-                <span>${message}</span>
-                <i class="fas fa-user"></i>
-            `;
-        }
-
-        messagesContainer.appendChild(messageElement);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    showTypingIndicator() {
-        const messagesContainer = document.getElementById('chatbotMessages');
-        if (!messagesContainer) return;
-
-        const typingElement = document.createElement('div');
-        typingElement.className = 'message bot-message typing-indicator';
-        typingElement.innerHTML = `
-            <i class="fas fa-robot"></i>
-            <span>
-                <i class="fas fa-circle"></i>
-                <i class="fas fa-circle"></i>
-                <i class="fas fa-circle"></i>
-            </span>
-        `;
-
-        messagesContainer.appendChild(typingElement);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    hideTypingIndicator() {
-        const typingIndicator = document.querySelector('.typing-indicator');
-        if (typingIndicator) {
-            typingIndicator.remove();
-        }
-    }
-
-    generateBotResponse(userMessage) {
-        const lowerMessage = userMessage.toLowerCase();
-
-        if (lowerMessage.includes('upload') || lowerMessage.includes('add')) {
-            return "To upload documents, click on 'Upload Documents' in the sidebar or use the quick action button. You can drag and drop files or click to browse.";
-        }
-
-        if (lowerMessage.includes('search') || lowerMessage.includes('find')) {
-            return "You can search documents in the 'My Documents' section. Use the search bar to find by name, type, or content.";
-        }
-
-        if (lowerMessage.includes('approval') || lowerMessage.includes('approve')) {
-            return "Document approvals can be managed in the 'My Documents' section. Managers and admins can approve or reject pending documents.";
-        }
-
-        if (lowerMessage.includes('analytics') || lowerMessage.includes('report')) {
-            return "Visit the Analytics page to view detailed reports, charts, and insights about your document usage and system performance.";
-        }
-
-        if (lowerMessage.includes('help') || lowerMessage.includes('how')) {
-            return "I'm here to help! You can ask me about uploading documents, searching, approvals, analytics, or any other features.";
-        }
-
-        // Default responses
-        return this.chatbotResponses[Math.floor(Math.random() * this.chatbotResponses.length)];
-    }
-
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-}
 
-// Global functions for chatbot
-function openChatbot() {
-    if (window.dashboardManager) {
-        window.dashboardManager.openChatbot();
+    updateDocumentCount() {
+        try {
+            const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+            const totalDocsElement = document.getElementById('totalDocs');
+
+            if (totalDocsElement) {
+                // Add a small random variation to make it look more dynamic
+                const baseCount = documents.length;
+                const variation = Math.floor(Math.random() * 5) - 2; // -2 to +2 variation
+                const displayCount = Math.max(0, baseCount + variation);
+
+                this.animateNumber(totalDocsElement, displayCount);
+            }
+        } catch (error) {
+            console.error('Error updating document count:', error);
+        }
     }
 }
 
-function closeChatbot() {
+// Refresh dashboard function
+function refreshDashboard() {
     if (window.dashboardManager) {
-        window.dashboardManager.closeChatbot();
-    }
-}
+        // Show loading state
+        window.dashboardManager.showLoadingState();
 
-function sendMessage() {
-    if (window.dashboardManager) {
-        window.dashboardManager.sendMessage();
+        // Regenerate sample data for more dynamic changes
+        window.dashboardManager.generateDynamicSampleData();
+
+        // Reload dashboard data
+        window.dashboardManager.loadDashboardData();
+
+        // Show refresh notification
+        if (window.showNotification) {
+            window.showNotification('Dashboard refreshed with new data!', 'success');
+        }
     }
 }
 
@@ -440,108 +405,3 @@ function sendMessage() {
 document.addEventListener('DOMContentLoaded', () => {
     window.dashboardManager = new DashboardManager();
 });
-
-// Add chatbot styles
-const chatbotStyles = `
-.chatbot {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.chatbot-header {
-    background: #2563eb;
-    color: white;
-    padding: 1rem;
-    border-radius: 10px 10px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chatbot-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-.chatbot-messages {
-    height: 350px;
-    overflow-y: auto;
-    padding: 1rem;
-    background: #f9fafb;
-}
-
-.message {
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-}
-
-.bot-message {
-    justify-content: flex-start;
-}
-
-.user-message {
-    justify-content: flex-end;
-    flex-direction: row-reverse;
-}
-
-.bot-message span {
-    background: white;
-    padding: 0.75rem;
-    border-radius: 0 10px 10px 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.user-message span {
-    background: #2563eb;
-    color: white;
-    padding: 0.75rem;
-    border-radius: 10px 0 10px 10px;
-}
-
-.chatbot-input {
-    padding: 1rem;
-    background: white;
-    border-radius: 0 0 10px 10px;
-    display: flex;
-    gap: 0.5rem;
-}
-
-.chatbot-input input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid #d1d5db;
-    border-radius: 5px;
-}
-
-.chatbot-input button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.typing-indicator span i {
-    animation: typing 1.4s infinite;
-    opacity: 0;
-}
-
-.typing-indicator span i:nth-child(1) { animation-delay: 0s; }
-.typing-indicator span i:nth-child(2) { animation-delay: 0.2s; }
-.typing-indicator span i:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typing {
-    0%, 60%, 100% { opacity: 0; }
-    30% { opacity: 1; }
-}
-`;
-
-// Add chatbot styles to document
-const styleSheet = document.createElement('style');
-styleSheet.textContent = chatbotStyles;
-document.head.appendChild(styleSheet);

@@ -4,9 +4,6 @@ class UploadManager {
     constructor() {
         this.uploadedFiles = [];
         this.fileMetadata = new Map();
-        this.extractedKeyPoints = new Map();
-        this.fileContents = new Map();
-        this.geminiApiKey = 'AIzaSyCTPieAB3raewjMv3E_iecoInNkXmVSGKA'; // Gemini API key
         this.init();
     }
 
@@ -14,18 +11,6 @@ class UploadManager {
         this.currentUser = this.getCurrentUser();
         this.setupDropZone();
         this.setupEventListeners();
-
-        // Test Gemini API connection on initialization
-        this.testGeminiConnection().then(connected => {
-            if (connected) {
-                console.log('✅ Gemini API is ready');
-            } else {
-                console.warn('⚠️ Gemini API connection issues detected');
-                this.showError('Gemini API connection issue detected. Basic metadata extraction will be used.');
-            }
-        }).catch(error => {
-            console.error('Error testing Gemini connection:', error);
-        });
     }
 
     getCurrentUser() {
@@ -41,7 +26,6 @@ class UploadManager {
     setupEventListeners() {
         const fileInput = document.getElementById('fileInput');
         const documentForm = document.getElementById('documentForm');
-        const extractKeyPointsBtn = document.getElementById('extractKeyPointsBtn');
 
         if (fileInput) {
             fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
@@ -49,10 +33,6 @@ class UploadManager {
 
         if (documentForm) {
             documentForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
-        }
-
-        if (extractKeyPointsBtn) {
-            extractKeyPointsBtn.addEventListener('click', () => this.extractKeyPointsWithAI());
         }
     }
 
@@ -119,12 +99,6 @@ class UploadManager {
 
         // Extract basic metadata from files
         await this.extractBasicMetadata();
-
-        // Store file contents for text files
-        await this.storeFileContents();
-
-        // Enhanced metadata extraction with Gemini AI
-        await this.extractMetadataWithAI();
 
         this.simulateUpload();
     }
@@ -254,457 +228,6 @@ class UploadManager {
         return tags;
     }
 
-    async storeFileContents() {
-        for (const file of this.uploadedFiles) {
-            if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-                try {
-                    const content = await this.readFileContent(file);
-                    this.fileContents.set(file.name, content);
-                } catch (error) {
-                    console.error(`Error reading content from ${file.name}:`, error);
-                }
-            }
-        }
-    }
-
-    async extractMetadataWithAI() {
-        for (const file of this.uploadedFiles) {
-            if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-                try {
-                    const fileContent = await this.readFileContent(file);
-                    const enhancedMetadata = await this.analyzeContentWithGemini(fileContent, file.name);
-
-                    // Merge AI-enhanced metadata with basic metadata
-                    const existingMetadata = this.fileMetadata.get(file.name) || {};
-                    this.fileMetadata.set(file.name, {
-                        ...existingMetadata,
-                        ...enhancedMetadata,
-                        aiEnhanced: true
-                    });
-                } catch (error) {
-                    console.error(`Error analyzing ${file.name} with AI:`, error);
-                }
-            }
-        }
-    }
-
-    async readFileContent(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = (e) => reject(e);
-            reader.readAsText(file);
-        });
-    }
-
-    async analyzeContentWithGemini(content, filename) {
-        try {
-            console.log('Starting Gemini analysis for:', filename);
-
-            const prompt = `Analyze this document content and extract metadata. Return a JSON object with the following structure:
-{
-  "title": "extracted or improved title",
-  "department": "detected department (Engineering, HR, Finance, Operations, Legal, or empty string)",
-  "tags": ["array", "of", "relevant", "tags"],
-  "summary": "brief 2-sentence summary",
-  "category": "suggested category (technical, hr, financial, operations, legal, marketing)",
-  "priority": "High, Medium, or Low",
-  "documentType": "Report, Policy, Schedule, Manual, etc."
-}
-
-Document filename: ${filename}
-Document content:
-${content.substring(0, 4000)}`; // Limit content to avoid token limits
-
-            console.log('Making API request to Gemini...');
-
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${this.geminiApiKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: prompt }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.1,
-                        topK: 1,
-                        topP: 1,
-                        maxOutputTokens: 2048,
-                    }
-                })
-            });
-
-            console.log('Response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error Response:', errorText);
-                throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
-            }
-
-            const data = await response.json();
-            console.log('API Response:', data);
-
-            // Validate response structure
-            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
-                console.error('Invalid response structure:', data);
-                throw new Error('Invalid response structure from Gemini API');
-            }
-
-            const generatedText = data.candidates[0].content.parts[0].text;
-            console.log('Generated text:', generatedText);
-
-            // Extract JSON from the response
-            const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                try {
-                    const parsedData = JSON.parse(jsonMatch[0]);
-                    console.log('Parsed metadata:', parsedData);
-                    return parsedData;
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    throw new Error('Failed to parse JSON from response');
-                }
-            } else {
-                console.warn('No valid JSON found in response, using fallback');
-                // Fallback metadata extraction
-                return {
-                    title: this.extractTitleFromFilename(filename),
-                    department: this.detectDepartmentFromFilename(filename),
-                    tags: this.extractTagsFromFilename(filename),
-                    summary: "Metadata extracted using fallback method due to API parsing issues.",
-                    category: "technical",
-                    priority: "Medium",
-                    documentType: "Document"
-                };
-            }
-        } catch (error) {
-            console.error('Error calling Gemini API:', error);
-
-            // Show user-friendly error
-            this.showError(`Gemini API Error: ${error.message}. Using basic metadata extraction.`);
-
-            // Return fallback metadata
-            return {
-                title: this.extractTitleFromFilename(filename),
-                department: this.detectDepartmentFromFilename(filename),
-                tags: this.extractTagsFromFilename(filename),
-                summary: "Metadata extracted using basic method due to API connection issues.",
-                category: "technical",
-                priority: "Medium",
-                documentType: "Document"
-            };
-        }
-    }
-
-    async extractKeyPointsWithAI() {
-        const keyPointsLoading = document.getElementById('keyPointsLoading');
-        const keyPointsContent = document.getElementById('keyPointsContent');
-        const extractBtn = document.getElementById('extractKeyPointsBtn');
-
-        if (keyPointsLoading) keyPointsLoading.style.display = 'block';
-        if (extractBtn) extractBtn.style.display = 'none';
-        if (keyPointsContent) keyPointsContent.innerHTML = '';
-
-        try {
-            let allKeyPoints = [];
-
-            for (const file of this.uploadedFiles) {
-                if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-                    const fileContent = await this.readFileContent(file);
-                    const keyPoints = await this.getKeyPointsFromGemini(fileContent, file.name);
-
-                    if (keyPoints && keyPoints.length > 0) {
-                        allKeyPoints.push({
-                            fileName: file.name,
-                            points: keyPoints
-                        });
-                        this.extractedKeyPoints.set(file.name, keyPoints);
-                    }
-                }
-            }
-
-            this.displayKeyPoints(allKeyPoints);
-        } catch (error) {
-            console.error('Error extracting key points:', error);
-            if (keyPointsContent) {
-                keyPointsContent.innerHTML = '<div class="alert alert-danger">Failed to extract key points. Please try again.</div>';
-            }
-        } finally {
-            if (keyPointsLoading) keyPointsLoading.style.display = 'none';
-            if (extractBtn) extractBtn.style.display = 'block';
-        }
-    }
-
-    async getKeyPointsFromGemini(content, filename) {
-        try {
-            console.log('Extracting key points for:', filename);
-
-            const prompt = `Extract the 5-7 most important key points from this document. Return them as a JSON array of strings.
-
-Example format: ["Key point 1", "Key point 2", "Key point 3"]
-
-Document: ${filename}
-Content:
-${content.substring(0, 4000)}`;
-
-            console.log('Making key points API request...');
-
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${this.geminiApiKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: prompt }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.3,
-                        topK: 40,
-                        topP: 0.95,
-                        maxOutputTokens: 1024,
-                    }
-                })
-            });
-
-            console.log('Key points response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Key points API Error:', errorText);
-                throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
-            }
-
-            const data = await response.json();
-            console.log('Key points response:', data);
-
-            // Validate response structure
-            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
-                console.error('Invalid key points response structure:', data);
-                throw new Error('Invalid response structure from Gemini API');
-            }
-
-            const generatedText = data.candidates[0].content.parts[0].text;
-            console.log('Generated key points text:', generatedText);
-
-            // Extract JSON array from the response
-            const jsonMatch = generatedText.match(/\[[\s\S]*\]/);
-            if (jsonMatch) {
-                try {
-                    const keyPoints = JSON.parse(jsonMatch[0]);
-                    console.log('Parsed key points:', keyPoints);
-                    return Array.isArray(keyPoints) ? keyPoints : [];
-                } catch (parseError) {
-                    console.error('Key points JSON parse error:', parseError);
-                }
-            }
-
-            // Fallback: split by lines and clean up
-            console.log('Using fallback key points extraction');
-            const fallbackPoints = generatedText.split('\n')
-                .filter(line => line.trim() && !line.includes('```') && !line.includes('[') && !line.includes(']'))
-                .map(line => line.replace(/^[\d\-\*\.\s]+/, '').trim())
-                .filter(line => line.length > 10)
-                .slice(0, 7);
-
-            console.log('Fallback key points:', fallbackPoints);
-            return fallbackPoints;
-
-        } catch (error) {
-            console.error('Error calling Gemini API for key points:', error);
-
-            // Show user-friendly error
-            this.showError(`Key Points API Error: ${error.message}. Please try again.`);
-
-            // Return basic key points as fallback
-            return [
-                `Document: ${filename}`,
-                "Content analysis failed - please check API connection",
-                "Key points extraction requires valid API response",
-                "Try refreshing the page and uploading again"
-            ];
-        }
-    }
-
-    async testGeminiConnection() {
-        try {
-            console.log('Testing Gemini API connection...');
-
-            const testPrompt = "Return exactly this JSON: {\"test\": \"success\", \"status\": \"connected\"}";
-
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${this.geminiApiKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: testPrompt }]
-                    }],
-                    generationConfig: {
-                        temperature: 0,
-                        maxOutputTokens: 100,
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Connection test failed:', errorText);
-                return false;
-            }
-
-            const data = await response.json();
-            console.log('Connection test response:', data);
-
-            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-                console.log('✅ Gemini API connection successful');
-                return true;
-            } else {
-                console.error('❌ Invalid response structure');
-                return false;
-            }
-
-        } catch (error) {
-            console.error('❌ Gemini API connection failed:', error);
-            return false;
-        }
-    }
-
-    showKeyPointsSection() {
-        const keyPointsSection = document.getElementById('keyPointsSection');
-        if (keyPointsSection) {
-            // Show key points section only if there are text files
-            const hasTextFiles = this.uploadedFiles.some(file =>
-                file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')
-            );
-
-            if (hasTextFiles) {
-                keyPointsSection.style.display = 'block';
-            }
-        }
-    }
-
-    displayKeyPoints(allKeyPoints) {
-        const keyPointsContent = document.getElementById('keyPointsContent');
-        if (!keyPointsContent) return;
-
-        if (allKeyPoints.length === 0) {
-            keyPointsContent.innerHTML = '<div class="alert alert-info">No text files found for key point extraction.</div>';
-            return;
-        }
-
-        let html = '';
-        allKeyPoints.forEach(filePoints => {
-            html += `
-                <div class="mb-3">
-                    <h6 class="text-primary"><i class="fas fa-file-alt"></i> ${filePoints.fileName}</h6>
-                    <ul class="list-unstyled">
-            `;
-
-            filePoints.points.forEach(point => {
-                html += `<li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>${point}</li>`;
-            });
-
-            html += `
-                    </ul>
-                </div>
-            `;
-        });
-
-        keyPointsContent.innerHTML = html;
-
-        // Refresh the file content viewer tabs with updated key points
-        this.createFileContentTabs();
-    }
-
-    showFileContentViewer() {
-        const fileContentSection = document.getElementById('fileContentSection');
-        if (!fileContentSection) return;
-
-        // Show file content section only if there are text files
-        const hasTextFiles = this.uploadedFiles.some(file =>
-            file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')
-        );
-
-        if (hasTextFiles) {
-            fileContentSection.style.display = 'block';
-            this.createFileContentTabs();
-        }
-    }
-
-    createFileContentTabs() {
-        const tabsContainer = document.getElementById('fileContentTabs');
-        const tabContentContainer = document.getElementById('fileContentTabContent');
-
-        if (!tabsContainer || !tabContentContainer) return;
-
-        // Clear existing tabs
-        tabsContainer.innerHTML = '';
-        tabContentContainer.innerHTML = '';
-
-        let activeTabSet = false;
-
-        this.uploadedFiles.forEach((file, index) => {
-            if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-                const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-                const tabId = `file-tab-${index}`;
-                const contentTabId = `file-content-${index}`;
-                const keyPointsTabId = `file-keypoints-${index}`;
-                const isActive = !activeTabSet;
-                activeTabSet = true;
-
-                // Create main file tab
-                const mainTab = document.createElement('li');
-                mainTab.className = 'nav-item dropdown';
-                mainTab.innerHTML = `
-                    <a class="nav-link dropdown-toggle ${isActive ? 'active' : ''}" data-bs-toggle="dropdown" href="#" role="button">
-                        <i class="fas fa-file-alt"></i> ${fileName}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#${contentTabId}" data-bs-toggle="tab">View Content</a></li>
-                        <li><a class="dropdown-item" href="#${keyPointsTabId}" data-bs-toggle="tab">Key Points</a></li>
-                    </ul>
-                `;
-                tabsContainer.appendChild(mainTab);
-
-                // Create content tab pane
-                const contentPane = document.createElement('div');
-                contentPane.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
-                contentPane.id = contentTabId;
-                contentPane.innerHTML = `
-                    <h6><i class="fas fa-file-text"></i> Content: ${file.name}</h6>
-                    <div class="file-content-viewer">${this.fileContents.get(file.name) || 'Content not available'}</div>
-                `;
-                tabContentContainer.appendChild(contentPane);
-
-                // Create key points tab pane
-                const keyPointsPane = document.createElement('div');
-                keyPointsPane.className = 'tab-pane fade';
-                keyPointsPane.id = keyPointsTabId;
-
-                const keyPoints = this.extractedKeyPoints.get(file.name);
-                let keyPointsHTML = `<h6><i class="fas fa-lightbulb"></i> Key Points: ${file.name}</h6>`;
-
-                if (keyPoints && keyPoints.length > 0) {
-                    keyPointsHTML += '<div class="key-points-viewer"><div class="list-group">';
-                    keyPoints.forEach(point => {
-                        keyPointsHTML += `<div class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i>${point}</div>`;
-                    });
-                    keyPointsHTML += '</div></div>';
-                } else {
-                    keyPointsHTML += '<div class="alert alert-info">Key points not extracted yet. Click "Extract Key Points with AI" button above.</div>';
-                }
-
-                keyPointsPane.innerHTML = keyPointsHTML;
-                tabContentContainer.appendChild(keyPointsPane);
-            }
-        });
-    }
-
     showDocumentForm() {
         const uploadForm = document.getElementById('uploadForm');
         if (uploadForm) {
@@ -729,12 +252,6 @@ ${content.substring(0, 4000)}`;
 
             // Show metadata extraction summary
             this.showMetadataPreview();
-
-            // Show key points section if text files
-            this.showKeyPointsSection();
-
-            // Show file content viewer
-            this.showFileContentViewer();
         }
     }
 
@@ -874,7 +391,6 @@ ${content.substring(0, 4000)}`;
                         extractedDate: metadata.date || '',
                         extractedDepartment: metadata.department || '',
                         extractedTags: metadata.tags || [],
-                        aiEnhanced: metadata.aiEnhanced || false,
                         documentType: metadata.documentType || '',
                         priority: metadata.priority || '',
                         summary: metadata.summary || '',
@@ -888,9 +404,7 @@ ${content.substring(0, 4000)}`;
             downloads: 0,
             views: 0,
             // Add extracted metadata summary
-            extractedMetadata: this.getMetadataSummary(),
-            // Add key points if extracted
-            keyPoints: this.getKeyPointsSummary()
+            extractedMetadata: this.getMetadataSummary()
         };
 
         // Add to documents array
@@ -919,16 +433,6 @@ ${content.substring(0, 4000)}`;
         // Clear uploaded files and metadata
         this.uploadedFiles = [];
         this.fileMetadata.clear();
-        this.extractedKeyPoints.clear();
-        this.fileContents.clear();
-
-        // Hide key points section
-        const keyPointsSection = document.getElementById('keyPointsSection');
-        if (keyPointsSection) keyPointsSection.style.display = 'none';
-
-        // Hide file content section
-        const fileContentSection = document.getElementById('fileContentSection');
-        if (fileContentSection) fileContentSection.style.display = 'none';
     }
 
     getFileIcon(fileType) {
@@ -1007,14 +511,6 @@ ${content.substring(0, 4000)}`;
         });
 
         return summary;
-    }
-
-    getKeyPointsSummary() {
-        const keyPointsSummary = {};
-        this.extractedKeyPoints.forEach((points, fileName) => {
-            keyPointsSummary[fileName] = points;
-        });
-        return keyPointsSummary;
     }
 
     showSuccess(message) {

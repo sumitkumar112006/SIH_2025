@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - KMRL Document Management System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            color: #334155;
+        }
+
+        .ai-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .ai-header {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-header h1 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .ai-header-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .ai-main {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .ai-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .ai-sidebar h3 {
+            margin-top: 0;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.75rem;
+        }
+
+        .ai-role-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-role-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .ai-role-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #1e293b;
+        }
+
+        .ai-access-level {
+            background: #dbeafe;
+            color: #2563eb;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .ai-role-details h5 {
+            margin: 1rem 0 0.5rem 0;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .ai-role-details ul {
+            margin: 0.25rem 0 1rem 1rem;
+            padding: 0;
+            font-size: 0.85rem;
+        }
+
+        .ai-role-details li {
+            margin-bottom: 0.25rem;
+        }
+
+        .ai-features {
+            margin-top: 1.5rem;
+        }
+
+        .ai-feature-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: left;
+        }
+
+        .ai-feature-btn:hover {
+            border-color: #2563eb;
+            background: #f0f7ff;
+            transform: translateY(-1px);
+        }
+
+        .ai-feature-btn i {
+            font-size: 1.2rem;
+            color: #2563eb;
+        }
+
+        .ai-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .ai-mode-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .ai-mode-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-mode-btn:hover {
+            background: #f8fafc;
+        }
+
+        .ai-mode-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .ai-mode-btn i {
+            font-size: 1.2rem;
+        }
+
+        .ai-mode-description {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .ai-document-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-document-selector select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .ai-chat-container {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ai-message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .ai-message.user {
+            align-self: flex-end;
+            background: #2563eb;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .ai-message.ai {
+            align-self: flex-start;
+            background: #e2e8f0;
+            border-bottom-left-radius: 0;
+        }
+
+        .ai-message.system {
+            align-self: center;
+            background: #dbeafe;
+            color: #2563eb;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+        }
+
+        .ai-message-content {
+            line-height: 1.5;
+        }
+
+        .ai-message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+
+        .ai-input-area {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .ai-message-input {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            resize: none;
+            font-family: inherit;
+            height: 60px;
+        }
+
+        .ai-message-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .ai-send-btn {
+            padding: 0 1.5rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .ai-send-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .ai-footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .ai-clear-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .ai-clear-btn:hover {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .ai-main {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-mode-btn {
+                min-width: 100px;
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .ai-input-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ai-container">
+        <div class="ai-header">
+            <h1><i class="fas fa-robot"></i> KMRL AI Assistant</h1>
+            <div class="ai-header-buttons">
+                <button class="btn btn-outline" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-outline" id="backBtn">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+        </div>
+
+        <div class="ai-main">
+            <div class="ai-sidebar">
+                <div class="ai-role-info" id="aiRoleInfo">
+                    <div class="ai-role-header">
+                        <h4>Loading...</h4>
+                        <span class="ai-access-level">Loading...</span>
+                    </div>
+                    <div class="ai-role-details">
+                        <p><strong>Department:</strong> <span id="userDepartment">Loading...</span></p>
+                        <div class="ai-capabilities">
+                            <h5>Capabilities:</h5>
+                            <ul id="userCapabilities">
+                                <li>Loading...</li>
+                            </ul>
+                        </div>
+                        <div class="ai-permissions">
+                            <h5>Permissions:</h5>
+                            <ul id="userPermissions">
+                                <li>Loading...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-features">
+                    <h3>AI Features</h3>
+                    <button class="ai-feature-btn" data-feature="summarize">
+                        <i class="fas fa-file-alt"></i>
+                        <div>
+                            <strong>Summarize</strong>
+                            <div>Get concise document summaries</div>
+                        </div>
+                    </button>
+                    <button class="ai-feature-btn" data-feature="translate">
+                        <i class="fas fa-language"></i>
+                        <div>
+                            <strong>Translate</strong>
+                            <div>English ↔ Malayalam translation</div>
+                        </div>
+                    </button>
+                    <button class="ai-feature-btn" data-feature="classify">
+                        <i class="fas fa-tags"></i>
+                        <div>
+                            <strong>Classify</strong>
+                            <div>Auto-tag documents</div>
+                        </div>
+                    </button>
+                    <button class="ai-feature-btn" data-feature="extract">
+                        <i class="fas fa-key"></i>
+                        <div>
+                            <strong>Extract</strong>
+                            <div>Pull key information</div>
+                        </div>
+                    </button>
+                    <button class="ai-feature-btn" data-feature="search">
+                        <i class="fas fa-search"></i>
+                        <div>
+                            <strong>Search</strong>
+                            <div>Semantic document search</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="ai-content">
+                <div class="ai-mode-selector">
+                    <button class="ai-mode-btn active" data-mode="chat">
+                        <i class="fas fa-comment"></i>
+                        <span>Chat</span>
+                    </button>
+                    <button class="ai-mode-btn" data-mode="summarizer">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Summarize</span>
+                    </button>
+                    <button class="ai-mode-btn" data-mode="translator">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </button>
+                    <button class="ai-mode-btn" data-mode="search">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+
+                <div class="ai-mode-description" id="aiModeDescription">
+                    Chat Mode: Ask questions about the system or document management
+                </div>
+
+                <div class="ai-document-selector" id="aiDocumentSelectorContainer" style="display: none;">
+                    <label for="aiDocumentSelect">Select Document:</label>
+                    <select id="aiDocumentSelect">
+                        <option value="">Select a document</option>
+                    </select>
+                </div>
+
+                <div class="ai-chat-container" id="aiChatContainer">
+                    <div class="ai-message ai">
+                        <div class="ai-message-content">
+                            <div class="ai-welcome">
+                                <div style="text-align: center; margin-bottom: 1rem;">
+                                    <div
+                                        style="width: 60px; height: 60px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 1.5rem;">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <h3>Welcome to KMRL AI Assistant</h3>
+                                    <p>I'm here to help you with document management tasks. You can ask me to:</p>
+                                    <ul style="text-align: left; margin: 1rem 0; padding-left: 1.25rem;">
+                                        <li>Summarize documents</li>
+                                        <li>Translate content between English and Malayalam</li>
+                                        <li>Search documents semantically</li>
+                                        <li>Extract key information</li>
+                                        <li>Classify documents</li>
+                                        <li>Find related documents</li>
+                                    </ul>
+                                    <p>How can I assist you today?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-input-area">
+                    <textarea id="aiUserMessage" class="ai-message-input"
+                        placeholder="Type your message here... (Press Enter to send)"></textarea>
+                    <button class="ai-send-btn" id="aiSendMessage">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+
+                <div class="ai-footer">
+                    <div>KMRL Document Management System</div>
+                    <button class="ai-clear-btn" id="aiClearHistory">
+                        Clear History
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/authorization.js"></script>
+    <script>
+        // AI Assistant functionality
+        class AIDedicatedPage {
+            constructor() {
+                this.currentUser = this.getCurrentUser();
+                this.assistantMode = 'chat';
+                this.currentDocument = null;
+                this.conversationHistory = [];
+                this.apiBaseUrl = '/api/ai';
+                this.init();
+            }
+
+            init() {
+                console.log('AI Dedicated Page: Initializing...');
+                this.setupEventListeners();
+                this.loadConversationHistory();
+                this.setupRoleBasedKnowledge();
+                this.renderRoleInfo();
+                this.renderDocumentSelector();
+                console.log('AI Dedicated Page: Initialized with user:', this.currentUser);
+            }
+
+            getCurrentUser() {
+                try {
+                    const userData = localStorage.getItem('kmrl_user');
+                    console.log('AI Dedicated Page: Found user data in localStorage:', userData);
+                    const parsedUser = userData ? JSON.parse(userData) : null;
+                    console.log('AI Dedicated Page: Parsed user data:', parsedUser);
+                    return parsedUser;
+                } catch (error) {
+                    console.error('Error getting user data:', error);
+                    return null;
+                }
+            }
+
+            setupRoleBasedKnowledge() {
+                console.log('AI Dedicated Page: Setting up role-based knowledge for user:', this.currentUser);
+                if (this.currentUser) {
+                    console.log('AI Dedicated Page: User role is:', this.currentUser.role);
+                    switch (this.currentUser.role) {
+                        case 'admin':
+                            this.roleKnowledge = this.getAdminKnowledge();
+                            console.log('AI Dedicated Page: Set up admin knowledge');
+                            break;
+                        case 'manager':
+                            this.roleKnowledge = this.getManagerKnowledge();
+                            console.log('AI Dedicated Page: Set up manager knowledge');
+                            break;
+                        case 'staff':
+                            this.roleKnowledge = this.getStaffKnowledge();
+                            console.log('AI Dedicated Page: Set up staff knowledge');
+                            break;
+                        default:
+                            this.roleKnowledge = this.getDefaultKnowledge();
+                            console.log('AI Dedicated Page: Set up default knowledge');
+                    }
+                } else {
+                    this.roleKnowledge = this.getDefaultKnowledge();
+                    console.log('AI Dedicated Page: No user found, set up default knowledge');
+                }
+                console.log('AI Dedicated Page: Role knowledge configured:', this.roleKnowledge);
+            }
+
+            getAdminKnowledge() {
+                return {
+                    role: 'System Administrator',
+                    accessLevel: 'Full System Access',
+                    capabilities: [
+                        'User Management',
+                        'System Configuration',
+                        'Document Oversight',
+                        'Workflow Management',
+                        'Security Monitoring',
+                        'System Analytics',
+                        'Backup and Restore',
+                        'All Department Access',
+                        'AI Model Management',
+                        'System-wide Document Processing'
+                    ],
+                    permissions: [
+                        'Create/Edit/Delete Users',
+                        'Modify System Settings',
+                        'Approve/Reject Any Document',
+                        'View All System Logs',
+                        'Configure Workflows',
+                        'Perform System Backups',
+                        'Access All AI Features',
+                        'Manage AI Service Configuration'
+                    ]
+                };
+            }
+
+            getManagerKnowledge() {
+                return {
+                    role: 'Department Manager',
+                    accessLevel: 'Department Level Access',
+                    department: this.currentUser?.department || 'Operations',
+                    capabilities: [
+                        'Department Document Management',
+                        'Staff Performance Monitoring',
+                        'Department Analytics',
+                        'Document Approval (Department Only)',
+                        'Task Assignment',
+                        'Department Reporting',
+                        'Department AI Insights',
+                        'Team Document Processing'
+                    ],
+                    permissions: [
+                        'Approve/Reject Department Documents',
+                        'View Department Analytics',
+                        'Manage Department Staff Tasks',
+                        'Generate Department Reports',
+                        'Access Department AI Features',
+                        'View Team Processing Results'
+                    ]
+                };
+            }
+
+            getStaffKnowledge() {
+                return {
+                    role: 'Staff Member',
+                    accessLevel: 'Personal Document Access',
+                    department: this.currentUser?.department || 'General',
+                    capabilities: [
+                        'Document Upload',
+                        'Personal Document Management',
+                        'Task Completion',
+                        'Department Communication',
+                        'Personal Document Processing',
+                        'Document Summarization',
+                        'Document Translation'
+                    ],
+                    permissions: [
+                        'Upload Documents',
+                        'Edit Own Pending Documents',
+                        'View Assigned Tasks',
+                        'Access Department Documents',
+                        'Use Basic AI Features',
+                        'Process Personal Documents'
+                    ]
+                };
+            }
+
+            getDefaultKnowledge() {
+                return {
+                    role: 'Guest User',
+                    accessLevel: 'Limited Access',
+                    capabilities: [
+                        'Basic System Information',
+                        'Public Document Access',
+                        'Basic Search'
+                    ],
+                    permissions: [
+                        'View Public Information Only',
+                        'Basic Search Only'
+                    ]
+                };
+            }
+
+            setupEventListeners() {
+                console.log('AI Dedicated Page: Setting up event listeners');
+
+                // Mode buttons
+                document.querySelectorAll('.ai-mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const mode = e.target.closest('.ai-mode-btn').dataset.mode;
+                        console.log('AI Dedicated Page: Mode button clicked:', mode);
+                        this.switchMode(mode);
+                    });
+                });
+
+                // Feature buttons
+                document.querySelectorAll('.ai-feature-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const feature = e.target.closest('.ai-feature-btn').dataset.feature;
+                        console.log('AI Dedicated Page: Feature button clicked:', feature);
+                        this.executeFeature(feature);
+                    });
+                });
+
+                // Send message button
+                document.getElementById('aiSendMessage').addEventListener('click', () => {
+                    console.log('AI Dedicated Page: Send message button clicked');
+                    this.handleUserMessage();
+                });
+
+                // Clear history button
+                document.getElementById('aiClearHistory').addEventListener('click', () => {
+                    console.log('AI Dedicated Page: Clear history button clicked');
+                    this.clearConversationHistory();
+                });
+
+                // Document selector
+                document.getElementById('aiDocumentSelect').addEventListener('change', (e) => {
+                    const docId = e.target.value;
+                    console.log('AI Dedicated Page: Document selected:', docId);
+                    this.selectDocument(docId);
+                });
+
+                // Handle Enter key in message input
+                document.getElementById('aiUserMessage').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        console.log('AI Dedicated Page: Enter key pressed in message input');
+                        this.handleUserMessage();
+                    }
+                });
+
+                // Back button
+                document.getElementById('backBtn').addEventListener('click', () => {
+                    console.log('AI Dedicated Page: Back button clicked');
+                    window.location.href = 'dashboard.html';
+                });
+
+                // Refresh button
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    console.log('AI Dedicated Page: Refresh button clicked');
+                    location.reload();
+                });
+
+                console.log('AI Dedicated Page: Event listeners set up');
+            }
+
+            switchMode(mode) {
+                this.assistantMode = mode;
+
+                // Update UI to reflect mode change
+                document.querySelectorAll('.ai-mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.mode === mode) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // Update mode description
+                const modeDesc = document.getElementById('aiModeDescription');
+                if (modeDesc) {
+                    const descriptions = {
+                        chat: 'Chat Mode: Ask questions about the system or document management',
+                        summarizer: 'Summarizer Mode: Get concise summaries of documents or text',
+                        translator: 'Translator Mode: Translate between English and Malayalam',
+                        search: 'Search Mode: Find documents by meaning, not just keywords'
+                    };
+                    modeDesc.textContent = descriptions[mode] || descriptions.chat;
+                }
+
+                // Show/hide document selector based on mode
+                const docSelectorContainer = document.getElementById('aiDocumentSelectorContainer');
+                if (docSelectorContainer) {
+                    docSelectorContainer.style.display = (mode === 'summarizer') ? 'block' : 'none';
+                }
+
+                // Add mode change message to conversation
+                this.addMessageToHistory('system', `Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`);
+                this.renderConversation();
+            }
+
+            async executeFeature(feature) {
+                console.log('AI Dedicated Page: Executing feature:', feature);
+
+                // Show thinking indicator
+                this.showThinkingIndicator();
+
+                try {
+                    let response = '';
+
+                    switch (feature) {
+                        case 'summarize':
+                            if (this.currentDocument) {
+                                const docContent = this.getDocumentContentForProcessing(this.currentDocument);
+                                response = await this.summarizeContent(docContent);
+                            } else {
+                                response = 'Please select a document first to summarize.';
+                            }
+                            break;
+
+                        case 'translate':
+                            response = 'Switched to Translator mode. Please enter text to translate.';
+                            this.switchMode('translator');
+                            break;
+
+                        case 'classify':
+                            if (this.currentDocument) {
+                                const docContent = this.currentDocument.description || this.currentDocument.title;
+                                if (docContent) {
+                                    try {
+                                        const responseApi = await fetch(`${this.apiBaseUrl}/classify-document`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({ text: docContent })
+                                        });
+
+                                        if (responseApi.ok) {
+                                            const data = await responseApi.json();
+                                            if (data.success) {
+                                                response = `**Document Classification**
+
+Category: ${data.category}
+Confidence: ${(data.confidence * 100).toFixed(1)}%
+Tags: ${data.tags.join(', ')}`;
+                                            } else {
+                                                response = 'Unable to classify the document at this time.';
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error('Error calling classify API:', error);
+                                        response = 'Unable to classify the document at this time.';
+                                    }
+                                } else {
+                                    response = 'No content available to classify.';
+                                }
+                            } else {
+                                response = 'Please select a document first to classify.';
+                            }
+                            break;
+
+                        case 'extract':
+                            if (this.currentDocument) {
+                                const docContent = this.currentDocument.description || this.currentDocument.title;
+                                if (docContent) {
+                                    try {
+                                        const responseApi = await fetch(`${this.apiBaseUrl}/extract-entities`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({ text: docContent })
+                                        });
+
+                                        if (responseApi.ok) {
+                                            const data = await responseApi.json();
+                                            if (data.success) {
+                                                response = `**Extracted Entities**
+
+Dates: ${data.entities.dates.join(', ') || 'None found'}
+Names: ${data.entities.names.join(', ') || 'None found'}
+Amounts: ${data.entities.amounts.join(', ') || 'None found'}
+Regulations: ${data.entities.regulations.join(', ') || 'None found'}
+Project IDs: ${data.entities.projectIds.join(', ') || 'None found'}`;
+                                            } else {
+                                                response = 'Unable to extract entities from the document at this time.';
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error('Error calling extract API:', error);
+                                        response = 'Unable to extract entities from the document at this time.';
+                                    }
+                                } else {
+                                    response = 'No content available to extract entities from.';
+                                }
+                            } else {
+                                response = 'Please select a document first to extract entities.';
+                            }
+                            break;
+
+                        case 'search':
+                            response = 'Switched to Search mode. Please enter your search query.';
+                            this.switchMode('search');
+                            break;
+
+                        default:
+                            response = `Feature "${feature}" is not yet implemented.`;
+                    }
+
+                    // Add AI response to conversation
+                    this.addMessageToHistory('ai', response);
+                } catch (error) {
+                    console.error('AI Dedicated Page feature error:', error);
+                    this.addMessageToHistory('ai', 'Sorry, I encountered an error executing that feature. Please try again.');
+                } finally {
+                    this.hideThinkingIndicator();
+                    this.renderConversation();
+                }
+            }
+
+            async handleUserMessage() {
+                console.log('AI Dedicated Page: Handling user message');
+                const input = document.getElementById('aiUserMessage');
+                console.log('AI Dedicated Page: Found input element:', input);
+                const message = input.value.trim();
+                console.log('AI Dedicated Page: Message content:', message);
+
+                if (!message) {
+                    console.log('AI Dedicated Page: No message to send');
+                    return;
+                }
+
+                // Add user message to conversation
+                this.addMessageToHistory('user', message);
+                input.value = '';
+
+                // Show thinking indicator
+                this.showThinkingIndicator();
+
+                try {
+                    // Process the message based on current mode
+                    let response;
+                    console.log('AI Dedicated Page: Current mode:', this.assistantMode);
+                    switch (this.assistantMode) {
+                        case 'summarizer':
+                            console.log('AI Dedicated Page: Processing as summarizer');
+                            response = await this.summarizeContent(message);
+                            break;
+                        case 'translator':
+                            console.log('AI Dedicated Page: Processing as translator');
+                            response = await this.translateContent(message);
+                            break;
+                        case 'search':
+                            console.log('AI Dedicated Page: Processing as search');
+                            response = await this.searchContent(message);
+                            break;
+                        case 'chat':
+                        default:
+                            console.log('AI Dedicated Page: Processing as chat');
+                            response = await this.chatResponse(message);
+                            break;
+                    }
+                    console.log('AI Dedicated Page: Response generated:', response);
+
+                    // Add AI response to conversation
+                    this.addMessageToHistory('ai', response);
+                } catch (error) {
+                    console.error('AI Dedicated Page error:', error);
+                    this.addMessageToHistory('ai', 'Sorry, I encountered an error processing your request. Please try again.');
+                } finally {
+                    this.hideThinkingIndicator();
+                    this.renderConversation();
+                }
+            }
+
+            async chatResponse(message) {
+                // Simulate AI processing delay
+                await this.delay(1000 + Math.random() * 1000);
+
+                // Simple rule-based responses for demo
+                const lowerMessage = message.toLowerCase();
+
+                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                    return `Hello! I'm the KMRL AI Assistant. I can help you with document management tasks. How can I assist you today?`;
+                }
+
+                if (lowerMessage.includes('help')) {
+                    return `I can help you with several advanced tasks:
+
+1. **Document Summarization** - Get concise summaries of documents
+2. **Translation** - Translate between English and Malayalam
+3. **Semantic Search** - Find documents by meaning, not just keywords
+4. **Document Classification** - Auto-tag documents by category
+5. **Entity Extraction** - Pull out key information like dates, names, amounts
+6. **Related Document Finding** - Discover connected documents
+7. **Compliance Checking** - Identify regulatory requirements
+8. **Action Point Extraction** - Find tasks and deadlines
+
+What would you like to do?`;
+                }
+
+                if (lowerMessage.includes('role') || lowerMessage.includes('permission')) {
+                    const capabilitiesList = this.roleKnowledge.capabilities.map(cap => `- ${cap}`).join('\n');
+                    const permissionsList = this.roleKnowledge.permissions.map(perm => `- ${perm}`).join('\n');
+                    return `Based on your role as ${this.roleKnowledge.role}, you have the following capabilities:
+
+**Capabilities:**
+${capabilitiesList}
+
+**Permissions:**
+${permissionsList}
+
+If you need help with any specific capability, just let me know!`;
+                }
+
+                if (lowerMessage.includes('document') && lowerMessage.includes('count')) {
+                    try {
+                        const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+                        let count = documents.length;
+
+                        // Filter based on user role
+                        if (this.currentUser) {
+                            switch (this.currentUser.role) {
+                                case 'manager':
+                                    count = documents.filter(doc =>
+                                        !doc.department || doc.department === this.currentUser.department
+                                    ).length;
+                                    break;
+                                case 'staff':
+                                    count = documents.filter(doc =>
+                                        doc.uploadedBy === this.currentUser.name ||
+                                        doc.uploadedBy === this.currentUser.id
+                                    ).length;
+                                    break;
+                            }
+                        }
+
+                        return `There are currently ${count} documents in the system that you have access to.`;
+                    } catch (error) {
+                        return "I'm having trouble accessing the document count right now. Please try again later.";
+                    }
+                }
+
+                if (lowerMessage.includes('summar') || lowerMessage.includes('summary')) {
+                    return "To get a document summary, please switch to Summarizer mode using the mode buttons above, then select a document or paste the content you'd like summarized.";
+                }
+
+                if (lowerMessage.includes('translat')) {
+                    return "To translate content, please switch to Translator mode using the mode buttons above. I can translate between English and Malayalam.";
+                }
+
+                if (lowerMessage.includes('search')) {
+                    return "To perform a semantic search, please switch to Search mode using the mode buttons above, then enter your query.";
+                }
+
+                if (lowerMessage.includes('classif')) {
+                    return "I can help classify documents into categories like HR, Finance, Engineering, Safety, etc. Please provide the document content you'd like classified.";
+                }
+
+                if (lowerMessage.includes('extract')) {
+                    return "I can extract key information from documents including dates, names, amounts, and more. Please provide the document content you'd like processed.";
+                }
+
+                // Default response
+                return `I understand you're asking about "${message}". As an AI assistant, I can help with:
+
+• Document summarization and key point extraction
+• English-Malayalam translation
+• Semantic document search
+• Document classification and tagging
+• Entity extraction (dates, names, amounts)
+• Related document discovery
+• Compliance checking
+• Action point identification
+
+Could you please be more specific about what you need help with?`;
+            }
+
+            async summarizeContent(content) {
+                // Simulate AI processing delay
+                await this.delay(1500 + Math.random() * 1000);
+
+                try {
+                    // Call the AI service endpoint
+                    const response = await fetch(`${this.apiBaseUrl}/summarize`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: content })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            const bulletPoints = data.summary.bulletPoints.map((point, i) => `${i + 1}. ${point}`).join('\n');
+                            return `**Document Summary**
+
+${data.summary.summary}
+
+**Key Points:**
+${bulletPoints}
+
+**Statistics:**
+- Word Count: ${data.summary.wordCount}
+- Sentence Count: ${data.summary.sentenceCount}`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error calling summarize API:', error);
+                }
+
+                // Fallback to simple summarization
+                const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                const wordCount = content.split(/\s+/).length;
+
+                if (sentences.length <= 3) {
+                    return `This content is already quite brief:\n\n${content}`;
+                }
+
+                // Extract key points (first, middle, last sentences)
+                const keyPoints = [
+                    sentences[0],
+                    sentences[Math.floor(sentences.length / 2)],
+                    sentences[sentences.length - 1]
+                ];
+
+                const keyPointsList = keyPoints.map((point, i) => `${i + 1}. ${point.trim()}`).join('\n');
+                return `**Summary**
+
+**Key Points:**
+${keyPointsList}
+
+**Word Count:** ${wordCount} words
+**Sentence Count:** ${sentences.length} sentences`;
+            }
+
+            async translateContent(content) {
+                // Simulate AI processing delay
+                await this.delay(1200 + Math.random() * 800);
+
+                try {
+                    // Call the AI service endpoint
+                    const response = await fetch(`${this.apiBaseUrl}/detect-translate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: content })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            const isEnglish = data.detectedLanguage === 'English';
+                            return `**${data.detectedLanguage} to ${isEnglish ? 'Malayalam' : 'English'} Translation**
+
+**Original (${data.detectedLanguage}):**
+${content}
+
+**Translated (${isEnglish ? 'Malayalam' : 'English'}):**
+${data.translatedText}
+
+**Confidence:** ${(data.confidence * 100).toFixed(1)}%`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error calling translate API:', error);
+                }
+
+                // Fallback to simple translation simulation
+                const isEnglish = /[a-zA-Z]/.test(content);
+                const wordCount = content.split(/\s+/).length;
+
+                if (isEnglish) {
+                    // English to Malayalam simulation
+                    return `**English to Malayalam Translation**
+
+**Original (English):**
+${content}
+
+**Translated (Malayalam):**
+[Simulated Malayalam translation would appear here]
+
+**Word Count:** ${wordCount} words`;
+                } else {
+                    // Malayalam to English simulation
+                    return `**Malayalam to English Translation**
+
+**Original (Malayalam):**
+${content}
+
+**Translated (English):**
+[Simulated English translation would appear here]
+
+**Word Count:** ${wordCount} words`;
+                }
+            }
+
+            async searchContent(query) {
+                // Simulate AI processing delay
+                await this.delay(1300 + Math.random() * 700);
+
+                try {
+                    // Call the AI service endpoint
+                    const response = await fetch(`${this.apiBaseUrl}/semantic-search`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ query: query })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.results.length > 0) {
+                            const resultsList = data.results.slice(0, 5).map(result =>
+                                `- ${result.title} (${result.category || 'Uncategorized'})`
+                            ).join('\n');
+
+                            return `**Search Results for "${query}"**
+
+Found ${data.resultCount} documents. Here are the top 5 matches:
+
+${resultsList}
+
+Would you like me to provide more details about any of these documents?`;
+                        } else {
+                            return `I couldn't find any documents matching "${query}". Try using different keywords or a more general search term.`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error calling search API:', error);
+                }
+
+                // Fallback response
+                return `I searched for "${query}" but couldn't connect to the advanced search service. In a real implementation, this would perform semantic search across all documents in the system.`;
+            }
+
+            selectDocument(docId) {
+                if (!docId) {
+                    this.currentDocument = null;
+                    return;
+                }
+
+                try {
+                    const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+                    this.currentDocument = documents.find(doc => doc.id === docId) || null;
+
+                    if (this.currentDocument) {
+                        // Add system message about document selection
+                        this.addMessageToHistory('system', `Selected document: ${this.currentDocument.title}`);
+                    }
+                } catch (error) {
+                    console.error('Error selecting document:', error);
+                    this.addMessageToHistory('system', 'Error selecting document');
+                }
+            }
+
+            getDocumentContentForProcessing(document) {
+                // Extract content from document for processing
+                let content = `Title: ${document.title}\n`;
+                if (document.description) {
+                    content += `Description: ${document.description}\n`;
+                }
+                if (document.category) {
+                    content += `Category: ${document.category}\n`;
+                }
+                if (document.tags && document.tags.length > 0) {
+                    content += `Tags: ${document.tags.join(', ')}\n`;
+                }
+
+                return content;
+            }
+
+            addMessageToHistory(sender, content) {
+                const message = {
+                    sender: sender,
+                    content: content.replace(/\n/g, '<br>'),
+                    timestamp: new Date()
+                };
+
+                this.conversationHistory.push(message);
+                this.saveConversationHistory();
+            }
+
+            showThinkingIndicator() {
+                const chatContainer = document.getElementById('aiChatContainer');
+                if (chatContainer) {
+                    const thinkingIndicator = document.createElement('div');
+                    thinkingIndicator.className = 'ai-message ai-thinking';
+                    thinkingIndicator.id = 'aiThinkingIndicator';
+                    thinkingIndicator.innerHTML = `
+                        <div class="ai-message-content">
+                            <div style="display: flex; gap: 0.25rem;">
+                                <span style="width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: ai-bounce 1.5s infinite;"></span>
+                                <span style="width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: ai-bounce 1.5s infinite; animation-delay: 0.2s;"></span>
+                                <span style="width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: ai-bounce 1.5s infinite; animation-delay: 0.4s;"></span>
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.appendChild(thinkingIndicator);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+            }
+
+            hideThinkingIndicator() {
+                const indicator = document.getElementById('aiThinkingIndicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            renderRoleInfo() {
+                const roleInfo = document.getElementById('aiRoleInfo');
+                if (roleInfo && this.roleKnowledge) {
+                    roleInfo.innerHTML = `
+                        <div class="ai-role-header">
+                            <h4>${this.roleKnowledge.role}</h4>
+                            <span class="ai-access-level">${this.roleKnowledge.accessLevel}</span>
+                        </div>
+                        <div class="ai-role-details">
+                            ${this.roleKnowledge.department ? `<p><strong>Department:</strong> ${this.roleKnowledge.department}</p>` : ''}
+                            <div class="ai-capabilities">
+                                <h5>Capabilities:</h5>
+                                <ul>
+                                    ${this.roleKnowledge.capabilities.map(cap => `<li>${cap}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="ai-permissions">
+                                <h5>Permissions:</h5>
+                                <ul>
+                                    ${this.roleKnowledge.permissions.map(perm => `<li>${perm}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    console.log('AI Dedicated Page: Role info rendered');
+                } else {
+                    console.log('AI Dedicated Page: Could not render role info - missing element or knowledge');
+                }
+            }
+
+            renderConversation() {
+                const chatContainer = document.getElementById('aiChatContainer');
+                if (chatContainer) {
+                    if (this.conversationHistory.length === 0) {
+                        chatContainer.innerHTML = `
+                            <div class="ai-message ai">
+                                <div class="ai-message-content">
+                                    <div class="ai-welcome">
+                                        <div style="text-align: center; margin-bottom: 1rem;">
+                                            <div style="width: 60px; height: 60px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 1.5rem;">
+                                                <i class="fas fa-robot"></i>
+                                            </div>
+                                            <h3>Welcome to KMRL AI Assistant</h3>
+                                            <p>I'm here to help you with document management tasks. You can ask me to:</p>
+                                            <ul style="text-align: left; margin: 1rem 0; padding-left: 1.25rem;">
+                                                <li>Summarize documents</li>
+                                                <li>Translate content between English and Malayalam</li>
+                                                <li>Search documents semantically</li>
+                                                <li>Extract key information</li>
+                                                <li>Classify documents</li>
+                                                <li>Find related documents</li>
+                                            </ul>
+                                            <p>How can I assist you today?</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        chatContainer.innerHTML = this.conversationHistory.map(msg => `
+                            <div class="ai-message ${msg.sender}">
+                                <div class="ai-message-content">
+                                    ${msg.content}
+                                    <div class="ai-message-time">${this.formatTime(msg.timestamp)}</div>
+                                </div>
+                            </div>
+                        `).join('');
+
+                        // Scroll to bottom
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
+                }
+            }
+
+            renderDocumentSelector() {
+                const selector = document.getElementById('aiDocumentSelect');
+                if (selector) {
+                    // Get documents based on user role
+                    let documents = [];
+                    try {
+                        documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+                        // Filter based on user role
+                        if (this.currentUser) {
+                            switch (this.currentUser.role) {
+                                case 'admin':
+                                    // Admin can see all documents
+                                    break;
+                                case 'manager':
+                                    // Manager can see documents from their department
+                                    documents = documents.filter(doc => {
+                                        // For simplicity, we'll assume documents have a department field
+                                        // In a real implementation, you'd check the uploader's department
+                                        return !doc.department || doc.department === this.currentUser.department;
+                                    });
+                                    break;
+                                case 'staff':
+                                    // Staff can see their own documents
+                                    documents = documents.filter(doc =>
+                                        doc.uploadedBy === this.currentUser.name ||
+                                        doc.uploadedBy === this.currentUser.id
+                                    );
+                                    break;
+                                default:
+                                    documents = [];
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading documents:', error);
+                        documents = [];
+                    }
+
+                    selector.innerHTML = `
+                        <option value="">Select a document</option>
+                        ${documents.map(doc => `
+                            <option value="${doc.id}" ${this.currentDocument?.id === doc.id ? 'selected' : ''}>
+                                ${doc.title} (${doc.category})
+                            </option>
+                        `).join('')}
+                    `;
+                }
+            }
+
+            loadConversationHistory() {
+                try {
+                    const saved = localStorage.getItem('kmrl_ai_conversation');
+                    if (saved) {
+                        this.conversationHistory = JSON.parse(saved).map(msg => ({
+                            ...msg,
+                            timestamp: new Date(msg.timestamp)
+                        }));
+                    }
+                } catch (error) {
+                    console.error('Error loading conversation history:', error);
+                    this.conversationHistory = [];
+                }
+            }
+
+            saveConversationHistory() {
+                try {
+                    localStorage.setItem('kmrl_ai_conversation', JSON.stringify(this.conversationHistory));
+                } catch (error) {
+                    console.error('Error saving conversation history:', error);
+                }
+            }
+
+            clearConversationHistory() {
+                if (confirm('Are you sure you want to clear the conversation history?')) {
+                    this.conversationHistory = [];
+                    this.saveConversationHistory();
+                    this.renderConversation();
+                }
+            }
+
+            formatTime(date) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize AI Assistant when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('AI Dedicated Page: DOM loaded, initializing AI Assistant');
+            window.aiDedicatedPage = new AIDedicatedPage();
+        });
+    </script>
+</body>
+
+</html>

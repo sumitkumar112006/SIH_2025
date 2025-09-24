@@ -88,7 +88,7 @@ All modules are integrated through a unified dashboard that provides a comprehen
 - Milestone management with progress indicators
 - Approval workflow tracking
 - Risk assessment and mitigation suggestions
-- AI-assisted workflow optimization
+- Workflow optimization
 
 ### Using Project Tracker
 1. **View Project Status**: The project widget shows active projects

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Data Generation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-display {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background-color: #388e3c;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Data Generation Test</h1>
+        <p>This page demonstrates how the dashboard data changes dynamically.</p>
+
+        <div class="controls">
+            <button onclick="generateNewData()">Generate New Data</button>
+            <button onclick="showCurrentData()">Show Current Data</button>
+            <button onclick="clearAllData()">Clear All Data</button>
+            <button onclick="goToDashboard()">Go to Dashboard</button>
+        </div>
+
+        <div class="timestamp" id="timestamp"></div>
+
+        <div class="data-display">
+            <h3>Current Data Summary</h3>
+            <div id="dataSummary">Click "Show Current Data" to display information</div>
+        </div>
+
+        <div class="data-display">
+            <h3>Sample Documents</h3>
+            <div id="sampleDocuments">No data loaded yet</div>
+        </div>
+    </div>
+
+    <script>
+        // Update timestamp
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = 'Last updated: ' + new Date().toLocaleString();
+        }
+
+        // Generate new data
+        function generateNewData() {
+            // Clear the last data generation timestamp to force new data
+            localStorage.removeItem('kmrl_last_data_gen');
+
+            // Initialize the dashboard manager to generate new data
+            if (typeof DashboardManager !== 'undefined') {
+                const manager = new DashboardManager();
+                manager.initializeDynamicSampleData();
+            } else {
+                // Fallback method
+                localStorage.setItem('kmrl_last_data_gen', '0');
+            }
+
+            alert('New data generated! Refresh the dashboard to see changes.');
+            updateTimestamp();
+        }
+
+        // Show current data
+        function showCurrentData() {
+            try {
+                const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+                const users = JSON.parse(localStorage.getItem('kmrl_users') || '[]');
+
+                // Display summary
+                const summary = `
+                    <p><strong>Total Documents:</strong> ${documents.length}</p>
+                    <p><strong>Total Users:</strong> ${users.length}</p>
+                    <p><strong>Storage Used:</strong> ${calculateStorageUsed(documents)} GB</p>
+                    <p><strong>Recent Uploads (7 days):</strong> ${getRecentUploads(documents)}</p>
+                `;
+                document.getElementById('dataSummary').innerHTML = summary;
+
+                // Display sample documents
+                if (documents.length > 0) {
+                    let html = '<ul>';
+                    // Show first 5 documents
+                    const sampleDocs = documents.slice(0, 5);
+                    sampleDocs.forEach(doc => {
+                        html += `
+                            <li>
+                                <strong>${doc.title}</strong> (${doc.category})<br>
+                                Uploaded: ${new Date(doc.uploadedAt).toLocaleString()}<br>
+                                Size: ${formatFileSize(doc.files[0].size)} | 
+                                Status: ${doc.status} | 
+                                Views: ${doc.views} | 
+                                Downloads: ${doc.downloads}
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                    if (documents.length > 5) {
+                        html += `<p><em>... and ${documents.length - 5} more documents</em></p>`;
+                    }
+                    document.getElementById('sampleDocuments').innerHTML = html;
+                } else {
+                    document.getElementById('sampleDocuments').innerHTML = '<p>No documents found</p>';
+                }
+            } catch (error) {
+                document.getElementById('dataSummary').innerHTML = '<p>Error loading data: ' + error.message + '</p>';
+            }
+            updateTimestamp();
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This will reset the dashboard to initial state.')) {
+                localStorage.removeItem('kmrl_documents');
+                localStorage.removeItem('kmrl_users');
+                localStorage.removeItem('kmrl_user');
+                localStorage.removeItem('kmrl_last_data_gen');
+                document.getElementById('dataSummary').innerHTML = '<p>All data cleared</p>';
+                document.getElementById('sampleDocuments').innerHTML = '<p>No data loaded yet</p>';
+                updateTimestamp();
+                alert('All data cleared! The dashboard will generate new data on next load.');
+            }
+        }
+
+        // Go to dashboard
+        function goToDashboard() {
+            localStorage.setItem('kmrl_testing_mode', 'true');
+            window.location.href = 'dashboard.html';
+        }
+
+        // Helper functions
+        function calculateStorageUsed(documents) {
+            let totalSize = 0;
+            documents.forEach(doc => {
+                const fileSize = doc.fileSize || (doc.files && doc.files[0] && doc.files[0].size) || 0;
+                totalSize += fileSize;
+            });
+            return (totalSize / (1024 * 1024 * 1024)).toFixed(1);
+        }
+
+        function getRecentUploads(documents) {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+            return documents.filter(doc => {
+                const uploadDate = new Date(doc.uploadedAt || doc.createdAt || new Date());
+                return uploadDate >= oneWeekAgo;
+            }).length;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Initialize
+        updateTimestamp();
+    </script>
+</body>
+
+</html>

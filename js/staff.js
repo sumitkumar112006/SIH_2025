@@ -32,7 +32,11 @@ class StaffManager {
 
     setupStaffRestrictions() {
         if (!this.currentUser || this.currentUser.role !== 'staff') {
-            return;
+            // For testing purposes, we'll allow this to work even without a logged-in user
+            const isTesting = localStorage.getItem('kmrl_testing_mode') === 'true';
+            if (!isTesting) {
+                return;
+            }
         }
 
         // Hide admin and manager only elements
@@ -401,11 +405,8 @@ class StaffManager {
     }
 
     async processFileUpload(file, category, description, tags) {
-        // Simulate file processing and AI analysis
+        // Simulate file processing
         await this.delay(1000);
-
-        // Generate AI summary and key points (simulation)
-        const { summary, keyPoints } = this.generateAIAnalysis(file.name, category);
 
         // Create document record
         const document = {
@@ -425,8 +426,6 @@ class StaffManager {
             status: 'pending',
             downloads: 0,
             views: 0,
-            summary: summary,
-            keyPoints: keyPoints,
             accessLevel: 'internal'
         };
 
@@ -436,32 +435,6 @@ class StaffManager {
         localStorage.setItem('kmrl_documents', JSON.stringify(documents));
 
         return document;
-    }
-
-    generateAIAnalysis(fileName, category) {
-        // Simulate AI-generated content based on file name and category
-        const summaries = {
-            financial: `Financial document analysis: This ${fileName} contains key financial metrics and performance indicators. The document includes budget allocations, expense reports, and revenue projections.`,
-            hr: `HR document analysis: This ${fileName} contains human resources information including policies, procedures, and employee-related documentation.`,
-            technical: `Technical document analysis: This ${fileName} contains technical specifications, requirements, and implementation details for system processes.`,
-            marketing: `Marketing document analysis: This ${fileName} contains marketing strategies, campaign data, and promotional materials for business growth.`,
-            operations: `Operations document analysis: This ${fileName} contains operational procedures, workflow documentation, and process optimization guidelines.`,
-            legal: `Legal document analysis: This ${fileName} contains legal requirements, compliance information, and regulatory documentation.`
-        };
-
-        const keyPointsMap = {
-            financial: ['Budget allocation breakdown', 'Revenue projections', 'Cost analysis', 'Performance metrics'],
-            hr: ['Policy updates', 'Employee procedures', 'Benefits information', 'Training requirements'],
-            technical: ['System requirements', 'Implementation steps', 'Technical specifications', 'Quality standards'],
-            marketing: ['Target audience analysis', 'Campaign strategies', 'Market research data', 'Performance metrics'],
-            operations: ['Process workflows', 'Quality controls', 'Efficiency measures', 'Standard procedures'],
-            legal: ['Compliance requirements', 'Legal obligations', 'Risk assessments', 'Regulatory guidelines']
-        };
-
-        return {
-            summary: summaries[category] || `Document analysis: This ${fileName} contains important information for the ${category} department.`,
-            keyPoints: keyPointsMap[category] || ['Key information identified', 'Important data points', 'Relevant content sections']
-        };
     }
 
     showMyTasks() {

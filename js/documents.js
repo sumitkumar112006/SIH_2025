@@ -132,30 +132,103 @@ class DocumentsManager {
     }
 
     generateSampleDocuments() {
-        return [
-            {
-                id: 'doc_1',
-                title: 'Financial Report Q4 2024',
-                category: 'financial',
-                files: [{ name: 'financial_report_q4.pdf', size: 2048000, type: 'application/pdf' }],
-                uploadedAt: '2024-01-15T10:30:00Z',
-                uploadedBy: 'Admin User',
-                status: 'approved',
-                downloads: 15,
-                views: 45
-            },
-            {
-                id: 'doc_2',
-                title: 'Employee Handbook 2024',
-                category: 'hr',
-                files: [{ name: 'employee_handbook.docx', size: 1536000, type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }],
-                uploadedAt: '2024-01-10T14:20:00Z',
-                uploadedBy: 'Manager User',
-                status: 'pending',
-                downloads: 8,
-                views: 22
-            }
-        ];
+        // Generate realistic document data that changes over time
+        const documentCount = Math.floor(Math.random() * 30) + 20; // Between 20-50 documents
+        const sampleDocuments = [];
+
+        // Document categories
+        const categories = ['financial', 'hr', 'projects', 'it', 'marketing', 'legal', 'operations'];
+        const statuses = ['approved', 'pending', 'rejected'];
+        const users = ['Admin User', 'Manager User', 'Staff User', 'Director User', 'Supervisor User'];
+
+        // Generate documents with realistic timestamps
+        for (let i = 0; i < documentCount; i++) {
+            // Random category
+            const category = categories[Math.floor(Math.random() * categories.length)];
+
+            // Random status with weighted probability (more approved, some pending, few rejected)
+            let status;
+            const statusRand = Math.random();
+            if (statusRand < 0.7) status = 'approved';
+            else if (statusRand < 0.9) status = 'pending';
+            else status = 'rejected';
+
+            // Random user
+            const user = users[Math.floor(Math.random() * users.length)];
+
+            // Random file size (100KB to 10MB)
+            const fileSize = Math.floor(Math.random() * 10000000) + 100000;
+
+            // Random date within the last 30 days
+            const daysAgo = Math.floor(Math.random() * 30);
+            const uploadDate = new Date();
+            uploadDate.setDate(uploadDate.getDate() - daysAgo);
+            uploadDate.setHours(Math.floor(Math.random() * 24));
+            uploadDate.setMinutes(Math.floor(Math.random() * 60));
+
+            // Random views and downloads
+            const views = Math.floor(Math.random() * 100);
+            const downloads = Math.floor(Math.random() * views * 0.7); // Downloads should be less than views
+
+            sampleDocuments.push({
+                id: `doc_${i + 1}`,
+                title: this.generateDocumentTitle(category),
+                category: category,
+                files: [{
+                    name: `document_${i + 1}.${this.getFileExtension(category)}`,
+                    size: fileSize,
+                    type: this.getFileType(category)
+                }],
+                uploadedAt: uploadDate.toISOString(),
+                uploadedBy: user,
+                status: status,
+                downloads: downloads,
+                views: views
+            });
+        }
+
+        return sampleDocuments;
+    }
+
+    generateDocumentTitle(category) {
+        const titles = {
+            'financial': ['Q1 Financial Report', 'Budget Analysis', 'Expense Report', 'Revenue Forecast', 'Investment Summary'],
+            'hr': ['Employee Handbook', 'Policy Update', 'Training Manual', 'Performance Review', 'Recruitment Plan'],
+            'projects': ['Project Status Update', 'Milestone Report', 'Risk Assessment', 'Timeline Adjustment', 'Resource Allocation'],
+            'it': ['Security Policy', 'System Upgrade Plan', 'Network Diagram', 'Backup Procedure', 'Access Control'],
+            'marketing': ['Campaign Strategy', 'Market Analysis', 'Customer Survey', 'Brand Guidelines', 'Promotion Plan'],
+            'legal': ['Contract Review', 'Compliance Report', 'Legal Opinion', 'Regulatory Update', 'Case Summary'],
+            'operations': ['Process Manual', 'SOP Update', 'Quality Check', 'Maintenance Schedule', 'Inventory Report']
+        };
+
+        const categoryTitles = titles[category] || ['General Document'];
+        return categoryTitles[Math.floor(Math.random() * categoryTitles.length)] + ' ' + new Date().getFullYear();
+    }
+
+    getFileExtension(category) {
+        const extensions = {
+            'financial': 'xlsx',
+            'hr': 'docx',
+            'projects': 'pptx',
+            'it': 'pdf',
+            'marketing': 'pptx',
+            'legal': 'pdf',
+            'operations': 'docx'
+        };
+        return extensions[category] || 'pdf';
+    }
+
+    getFileType(category) {
+        const types = {
+            'financial': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'hr': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'projects': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'it': 'application/pdf',
+            'marketing': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'legal': 'application/pdf',
+            'operations': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        };
+        return types[category] || 'application/pdf';
     }
 
     applyFilters() {
@@ -182,7 +255,11 @@ class DocumentsManager {
         if (!tbody) return;
 
         tbody.innerHTML = '';
-        countEl.textContent = docs.length;
+
+        // Update document count with animation
+        if (countEl) {
+            this.animateValue(countEl, parseInt(countEl.textContent) || 0, docs.length, 500);
+        }
 
         docs.forEach(doc => {
             const row = document.createElement('tr');
@@ -235,6 +312,25 @@ class DocumentsManager {
         });
     }
 
+    // Add animation function for document count
+    animateValue(element, start, end, duration) {
+        if (start === end) return;
+
+        const range = end - start;
+        let current = start;
+        const increment = end > start ? 1 : -1;
+        const stepTime = Math.abs(Math.floor(duration / range));
+
+        const timer = setInterval(() => {
+            current += increment;
+            element.textContent = current;
+
+            if (current === end) {
+                clearInterval(timer);
+            }
+        }, stepTime || 10);
+    }
+
     selectAll(checked) {
         document.querySelectorAll('.doc-checkbox').forEach(cb => cb.checked = checked);
     }
@@ -249,6 +345,14 @@ class DocumentsManager {
         const sizes = ['B', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    updateDocumentCount() {
+        const countEl = document.getElementById('documentCount');
+        if (countEl) {
+            const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+            this.animateValue(countEl, parseInt(countEl.textContent) || 0, documents.length, 500);
+        }
     }
 }
 
@@ -705,6 +809,19 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('kmrl_documents', JSON.stringify(sampleDocs));
     }
 });
+
+// Refresh documents function
+function refreshDocuments() {
+    if (window.documentsManager) {
+        window.documentsManager.loadDocuments();
+        window.documentsManager.applyFilters();
+        
+        // Show refresh notification
+        if (window.showNotification) {
+            window.showNotification('Documents refreshed successfully!', 'success');
+        }
+    }
+}
 
 // Reject document function with backend validation
 function rejectDocument(id) {

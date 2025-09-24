@@ -402,7 +402,10 @@
                     <i class="fas fa-folder"></i>
                     <span>My Documents</span>
                 </a>
-
+                <a href="document-count-demo.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Document Count Demo</span>
+                </a>
                 <a href="analytics.html" class="nav-link">
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
@@ -439,6 +442,10 @@
                     <h1>Dashboard</h1>
                 </div>
                 <div class="header-actions">
+                    <button class="btn btn-outline" id="refreshDashboard" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
                     <button class="btn btn-outline" id="sidebarToggle">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -532,7 +539,10 @@
                         <i class="fas fa-chart-line"></i>
                         <div>View Analytics</div>
                     </a>
-
+                    <a href="ai-assistant.html" class="action-card">
+                        <i class="fas fa-robot"></i>
+                        <div>AI Assistant</div>
+                    </a>
                 </div>
             </div>
 
@@ -552,7 +562,8 @@
     <script src="js/authorization.js"></script>
     <script src="js/common.js"></script>
     <script src="js/dashboard.js"></script>
-    
+    <script src="js/ai-assistant.js"></script>
+
     <script src="js/staff.js"></script>
 </body>
 

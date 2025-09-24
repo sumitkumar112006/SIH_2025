@@ -1,5 +1,18 @@
 // KMRL Document Management System - Common JavaScript
 
+// Enable testing mode automatically for development
+(function () {
+    // Check if we're in testing mode (either explicitly set or in a development environment)
+    const isTestingMode = localStorage.getItem('kmrl_testing_mode') === 'true' ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+
+    if (isTestingMode) {
+        localStorage.setItem('kmrl_testing_mode', 'true');
+        console.log('KMRL Document Management System - Testing Mode Enabled');
+    }
+})();
+
 class CommonManager {
     constructor() {
         this.init();

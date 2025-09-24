@@ -4,7 +4,7 @@ This document describes the backend architecture for the KMRL Tender Tracking Sy
 
 ## Architecture Overview
 
-The backend is built with Node.js and Express, providing RESTful APIs and real-time communication through WebSockets. It uses MongoDB for data persistence and integrates with AI services for intelligent tender processing.
+The backend is built with Node.js and Express, providing RESTful APIs and real-time communication through WebSockets. It uses MongoDB for data persistence.
 
 ## Technology Stack
 
@@ -13,7 +13,6 @@ The backend is built with Node.js and Express, providing RESTful APIs and real-t
 - **Real-time Communication**: Socket.IO
 - **Email Notifications**: Nodemailer
 - **Web Scraping**: Axios and Cheerio
-- **AI Integration**: OpenAI GPT
 - **Environment Management**: Dotenv
 
 ## Project Structure
@@ -30,8 +29,7 @@ KMRL2/
 │   └── User.js
 ├── services/              # Business logic services
 │   ├── scraper.js         # Web scraping service
-│   ├── monitor.js         # Portal monitoring service
-│   └── ai.js              # AI integration service
+│   └── monitor.js         # Portal monitoring service
 └── js/                    # Updated frontend files
     ├── api-client.js      # API client for frontend
     └── ...                # Updated existing JS files
@@ -62,21 +60,12 @@ The system uses Socket.IO for real-time communication:
 - Notifications are sent in real-time
 - Portal scanning updates are streamed to clients
 
-## AI Integration
-
-The AI service provides:
-- Tender summarization using OpenAI GPT
-- Automatic categorization by department
-- Keyword extraction
-- Priority assessment
-
 ## Web Scraping
 
 The scraping service:
 - Periodically scans government and private tender portals
 - Parses tender information
 - Filters tenders based on keywords
-- Applies AI enhancements to tender data
 
 ## Email Notifications
 
@@ -98,7 +87,6 @@ The system can send email notifications via SMTP:
 
 3. Configure environment variables in .env:
    - SMTP settings for email notifications
-   - OpenAI API key for AI features
    - MongoDB connection string
 
 4. Start the server:
@@ -131,7 +119,6 @@ npm test
 
 - Implement user authentication and role-based access control
 - Add more sophisticated scraping for specific portals
-- Enhance AI capabilities with custom models
 - Implement data analytics and reporting
 - Add mobile push notifications
 - Integrate with more government and private portals

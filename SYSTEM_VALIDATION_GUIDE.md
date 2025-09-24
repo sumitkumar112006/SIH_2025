@@ -253,8 +253,8 @@ The system generates realistic mock data including:
    - Push notification support
    - Offline capability
 
-2. **AI-Powered Matching**
-   - Machine learning for tender relevance
+2. **Enhanced Matching**
+   - Advanced tender relevance
    - Predictive analytics
    - Success probability scoring
 
@@ -280,7 +280,7 @@ The KMRL Tender Tracking System is now fully operational and ready for deploymen
 - ✅ Role-based access control
 - ✅ Mobile-responsive interface
 
-The system is designed to scale and can be easily extended with additional portals, enhanced AI capabilities, and deeper integrations with existing KMRL systems.
+The system is designed to scale and can be easily extended with additional portals, enhanced capabilities, and deeper integrations with existing KMRL systems.
 
 ---
 

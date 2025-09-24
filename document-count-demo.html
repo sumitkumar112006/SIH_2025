@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Count Demo - KMRL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin: 1rem 0;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 2rem 0;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .instructions ul {
+            padding-left: 1.5rem;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-file-alt"></i> Document Count Demo</h1>
+            <p>See how document counts update in real-time across the application</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-folder fa-2x" style="color: #2563eb;"></i>
+                <div class="stat-label">Total Documents</div>
+                <div class="stat-value" id="totalDocs">0</div>
+                <div class="stat-desc">Documents in the system</div>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-cloud-upload-alt fa-2x" style="color: #059669;"></i>
+                <div class="stat-label">My Documents</div>
+                <div class="stat-value" id="myDocs">0</div>
+                <div class="stat-desc">Documents in My Documents section</div>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-sync-alt fa-2x" style="color: #d97706;"></i>
+                <div class="stat-label">Refresh Count</div>
+                <div class="stat-value" id="refreshCount">0</div>
+                <div class="stat-desc">Times dashboard refreshed</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="addDocument()">
+                <i class="fas fa-plus"></i> Add Document
+            </button>
+            <button class="btn btn-danger" onclick="removeDocument()">
+                <i class="fas fa-minus"></i> Remove Document
+            </button>
+            <button class="btn btn-success" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+            <button class="btn btn-secondary" onclick="resetData()">
+                <i class="fas fa-undo"></i> Reset Data
+            </button>
+        </div>
+
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> How Document Count Works</h3>
+            <ul>
+                <li>The document count is automatically synchronized across all sections of the application</li>
+                <li>Adding or removing documents updates counts in real-time</li>
+                <li>Refreshing the data generates new sample documents with random counts</li>
+                <li>Counts are displayed in both the Dashboard and My Documents sections</li>
+                <li>Animation effects make count changes visually appealing</li>
+            </ul>
+            <p><strong>Try navigating to the Dashboard and My Documents sections to see the counts in action!</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let refreshCount = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            updateCounts();
+        });
+
+        function updateCounts() {
+            try {
+                const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+                // Update total documents count
+                document.getElementById('totalDocs').textContent = documents.length;
+
+                // Update my documents count (same as total in this demo)
+                document.getElementById('myDocs').textContent = documents.length;
+
+                // Update refresh count
+                document.getElementById('refreshCount').textContent = refreshCount;
+            } catch (error) {
+                console.error('Error updating counts:', error);
+            }
+        }
+
+        function addDocument() {
+            try {
+                const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+                // Create a new document
+                const newDoc = {
+                    id: 'doc_' + Date.now(),
+                    title: 'New Document ' + (documents.length + 1),
+                    category: ['financial', 'hr', 'projects', 'it', 'marketing'][Math.floor(Math.random() * 5)],
+                    files: [{
+                        name: 'document_' + Date.now() + '.pdf',
+                        size: Math.floor(Math.random() * 1000000) + 100000,
+                        type: 'application/pdf'
+                    }],
+                    uploadedAt: new Date().toISOString(),
+                    uploadedBy: 'Demo User',
+                    status: ['approved', 'pending', 'rejected'][Math.floor(Math.random() * 3)],
+                    downloads: Math.floor(Math.random() * 50),
+                    views: Math.floor(Math.random() * 100)
+                };
+
+                documents.push(newDoc);
+                localStorage.setItem('kmrl_documents', JSON.stringify(documents));
+
+                updateCounts();
+
+                // Show notification
+                if (window.showNotification) {
+                    window.showNotification('Document added successfully!', 'success');
+                } else {
+                    alert('Document added successfully!');
+                }
+            } catch (error) {
+                console.error('Error adding document:', error);
+                if (window.showNotification) {
+                    window.showNotification('Failed to add document: ' + error.message, 'error');
+                } else {
+                    alert('Failed to add document: ' + error.message);
+                }
+            }
+        }
+
+        function removeDocument() {
+            try {
+                const documents = JSON.parse(localStorage.getItem('kmrl_documents') || '[]');
+
+                if (documents.length === 0) {
+                    if (window.showNotification) {
+                        window.showNotification('No documents to remove!', 'warning');
+                    } else {
+                        alert('No documents to remove!');
+                    }
+                    return;
+                }
+
+                // Remove the last document
+                documents.pop();
+                localStorage.setItem('kmrl_documents', JSON.stringify(documents));
+
+                updateCounts();
+
+                // Show notification
+                if (window.showNotification) {
+                    window.showNotification('Document removed successfully!', 'success');
+                } else {
+                    alert('Document removed successfully!');
+                }
+            } catch (error) {
+                console.error('Error removing document:', error);
+                if (window.showNotification) {
+                    window.showNotification('Failed to remove document: ' + error.message, 'error');
+                } else {
+                    alert('Failed to remove document: ' + error.message);
+                }
+            }
+        }
+
+        function refreshData() {
+            try {
+                // Generate new sample data
+                generateSampleData();
+
+                refreshCount++;
+                updateCounts();
+
+                // Show notification
+                if (window.showNotification) {
+                    window.showNotification('Data refreshed successfully!', 'success');
+                } else {
+                    alert('Data refreshed successfully!');
+                }
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                if (window.showNotification) {
+                    window.showNotification('Failed to refresh data: ' + error.message, 'error');
+                } else {
+                    alert('Failed to refresh data: ' + error.message);
+                }
+            }
+        }
+
+        function resetData() {
+            if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                try {
+                    localStorage.removeItem('kmrl_documents');
+                    refreshCount = 0;
+                    updateCounts();
+
+                    // Show notification
+                    if (window.showNotification) {
+                        window.showNotification('Data reset successfully!', 'success');
+                    } else {
+                        alert('Data reset successfully!');
+                    }
+                } catch (error) {
+                    console.error('Error resetting data:', error);
+                    if (window.showNotification) {
+                        window.showNotification('Failed to reset data: ' + error.message, 'error');
+                    } else {
+                        alert('Failed to reset data: ' + error.message);
+                    }
+                }
+            }
+        }
+
+        function generateSampleData() {
+            const documentCount = Math.floor(Math.random() * 50) + 80; // Between 80-130 documents
+            const sampleDocuments = [];
+
+            // Document categories
+            const categories = ['financial', 'hr', 'projects', 'it', 'marketing', 'legal', 'operations'];
+            const statuses = ['approved', 'pending', 'rejected'];
+            const users = ['Admin User', 'Manager User', 'Staff User', 'Director User', 'Supervisor User'];
+
+            // Generate documents with realistic timestamps
+            for (let i = 0; i < documentCount; i++) {
+                // Random category
+                const category = categories[Math.floor(Math.random() * categories.length)];
+
+                // Random status with weighted probability (more approved, some pending, few rejected)
+                let status;
+                const statusRand = Math.random();
+                if (statusRand < 0.7) status = 'approved';
+                else if (statusRand < 0.9) status = 'pending';
+                else status = 'rejected';
+
+                // Random user
+                const user = users[Math.floor(Math.random() * users.length)];
+
+                // Random file size (100KB to 10MB)
+                const fileSize = Math.floor(Math.random() * 10000000) + 100000;
+
+                // Random date within the last 30 days
+                const daysAgo = Math.floor(Math.random() * 30);
+                const uploadDate = new Date();
+                uploadDate.setDate(uploadDate.getDate() - daysAgo);
+                uploadDate.setHours(Math.floor(Math.random() * 24));
+                uploadDate.setMinutes(Math.floor(Math.random() * 60));
+
+                // Random views and downloads
+                const views = Math.floor(Math.random() * 100);
+                const downloads = Math.floor(Math.random() * views * 0.7); // Downloads should be less than views
+
+                sampleDocuments.push({
+                    id: `doc_${i + 1}`,
+                    title: generateDocumentTitle(category),
+                    category: category,
+                    files: [{
+                        name: `document_${i + 1}.${getFileExtension(category)}`,
+                        size: fileSize,
+                        type: getFileType(category)
+                    }],
+                    uploadedAt: uploadDate.toISOString(),
+                    uploadedBy: user,
+                    status: status,
+                    downloads: downloads,
+                    views: views
+                });
+            }
+
+            localStorage.setItem('kmrl_documents', JSON.stringify(sampleDocuments));
+        }
+
+        function generateDocumentTitle(category) {
+            const titles = {
+                'financial': ['Q1 Financial Report', 'Budget Analysis', 'Expense Report', 'Revenue Forecast', 'Investment Summary'],
+                'hr': ['Employee Handbook', 'Policy Update', 'Training Manual', 'Performance Review', 'Recruitment Plan'],
+                'projects': ['Project Status Update', 'Milestone Report', 'Risk Assessment', 'Timeline Adjustment', 'Resource Allocation'],
+                'it': ['Security Policy', 'System Upgrade Plan', 'Network Diagram', 'Backup Procedure', 'Access Control'],
+                'marketing': ['Campaign Strategy', 'Market Analysis', 'Customer Survey', 'Brand Guidelines', 'Promotion Plan'],
+                'legal': ['Contract Review', 'Compliance Report', 'Legal Opinion', 'Regulatory Update', 'Case Summary'],
+                'operations': ['Process Manual', 'SOP Update', 'Quality Check', 'Maintenance Schedule', 'Inventory Report']
+            };
+
+            const categoryTitles = titles[category] || ['General Document'];
+            return categoryTitles[Math.floor(Math.random() * categoryTitles.length)] + ' ' + new Date().getFullYear();
+        }
+
+        function getFileExtension(category) {
+            const extensions = {
+                'financial': 'xlsx',
+                'hr': 'docx',
+                'projects': 'pptx',
+                'it': 'pdf',
+                'marketing': 'pptx',
+                'legal': 'pdf',
+                'operations': 'docx'
+            };
+            return extensions[category] || 'pdf';
+        }
+
+        function getFileType(category) {
+            const types = {
+                'financial': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'hr': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'projects': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'it': 'application/pdf',
+                'marketing': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'legal': 'application/pdf',
+                'operations': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            };
+            return types[category] || 'application/pdf';
+        }
+    </script>
+</body>
+
+</html>

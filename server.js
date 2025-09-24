@@ -10,6 +10,7 @@ const Notification = require('./models/Notification');
 const Portal = require('./models/Portal');
 const User = require('./models/User');
 const PortalMonitor = require('./services/monitor');
+const AIController = require('./services/ai/AIController');
 
 // Load environment variables
 dotenv.config();
@@ -39,7 +40,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/kmrl_tend
 });
 
 // Email transporter
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: process.env.SMTP_PORT || 587,
     secure: false,
@@ -51,6 +52,9 @@ const transporter = nodemailer.createTransporter({
 
 // Initialize portal monitor
 const portalMonitor = new PortalMonitor();
+
+// Initialize AI controller
+const aiController = new AIController();
 
 // API Routes
 app.get('/api/tenders', async (req, res) => {
@@ -139,6 +143,44 @@ app.post('/api/monitoring/stop', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// AI Service Routes
+// 🔍 Document Understanding & Processing
+app.post('/api/ai/extract-text', aiController.extractText.bind(aiController));
+app.post('/api/ai/detect-translate', aiController.detectAndTranslate.bind(aiController));
+app.post('/api/ai/classify-document', aiController.classifyDocument.bind(aiController));
+app.post('/api/ai/extract-entities', aiController.extractEntities.bind(aiController));
+app.post('/api/ai/compare-versions', aiController.compareVersions.bind(aiController));
+
+// 📑 Summarization & Knowledge Extraction
+app.post('/api/ai/summarize', aiController.summarizeDocument.bind(aiController));
+app.post('/api/ai/extract-action-points', aiController.extractActionPoints.bind(aiController));
+app.post('/api/ai/highlight-compliance', aiController.highlightCompliance.bind(aiController));
+app.post('/api/ai/extract-key-value', aiController.extractKeyValuePairs.bind(aiController));
+
+// 🔎 Search & Retrieval
+app.post('/api/ai/semantic-search', aiController.semanticSearch.bind(aiController));
+app.post('/api/ai/multilingual-search', aiController.multilingualSearch.bind(aiController));
+app.post('/api/ai/find-related', aiController.findRelatedDocuments.bind(aiController));
+app.post('/api/ai/visual-search', aiController.visualSearch.bind(aiController));
+
+// ⚡ Personalization & Notifications
+app.post('/api/ai/recommendations', aiController.getRecommendations.bind(aiController));
+app.get('/api/ai/priority-alerts', aiController.getPriorityAlerts.bind(aiController));
+app.post('/api/ai/digest', aiController.getDigest.bind(aiController));
+
+// 🛡️ Trust, Security & Compliance
+app.post('/api/ai/traceability', aiController.getTraceabilityInfo.bind(aiController));
+app.post('/api/ai/access-control', aiController.checkAccessControl.bind(aiController));
+app.get('/api/ai/anomalies', aiController.detectAnomalies.bind(aiController));
+
+// 📊 Analytics & Insights
+app.get('/api/ai/trends', aiController.analyzeTrends.bind(aiController));
+app.get('/api/ai/knowledge-base', aiController.buildKnowledgeBase.bind(aiController));
+app.get('/api/ai/usage-insights', aiController.getUsageInsights.bind(aiController));
+
+// Batch Processing
+app.post('/api/ai/process-batch', aiController.processDocumentBatch.bind(aiController));
 
 // WebSocket connection
 io.on('connection', (socket) => {

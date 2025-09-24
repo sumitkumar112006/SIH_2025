@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard Refresh Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .refresh-info {
+            background-color: #f1f8e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #1976d2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Dashboard Refresh Demo</h1>
+
+        <div class="instructions">
+            <h2>How to Test Dynamic Values</h2>
+            <p>This demo shows how the dashboard values change with each refresh:</p>
+            <ol>
+                <li>Click the button below to go to the dashboard</li>
+                <li>Note the current values displayed</li>
+                <li>Refresh the dashboard page (F5 or Ctrl+R)</li>
+                <li>Observe how the values have changed</li>
+                <li>Repeat to see different values each time</li>
+            </ol>
+        </div>
+
+        <button onclick="goToDashboard()">Go to Dashboard</button>
+
+        <div class="refresh-info">
+            <h3>How It Works</h3>
+            <p>The system generates realistic document data with:</p>
+            <ul>
+                <li>Random document counts (100-150 documents)</li>
+                <li>Random upload dates within the last 30 days</li>
+                <li>Random file sizes (100KB - 10MB)</li>
+                <li>Realistic views and download counts</li>
+                <li>Varied document categories and statuses</li>
+            </ul>
+            <p>Every hour, completely new data is generated to keep the system fresh!</p>
+        </div>
+    </div>
+
+    <script>
+        function goToDashboard() {
+            // Enable testing mode
+            localStorage.setItem('kmrl_testing_mode', 'true');
+            // Clear the last data generation timestamp to force new data
+            localStorage.removeItem('kmrl_last_data_gen');
+            // Go to dashboard
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+
+</html>

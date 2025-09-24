@@ -1,7 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const Tender = require('../models/Tender');
-const AIService = require('./ai');
 
 class TenderScraper {
     constructor() {
@@ -9,7 +8,6 @@ class TenderScraper {
         this.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         };
-        this.aiService = new AIService();
     }
 
     async scrapePortal(portal) {
@@ -114,12 +112,6 @@ class TenderScraper {
 
             // Only include tenders that match our keywords
             if (this.matchesKeywords(tender)) {
-                // Apply AI enhancements
-                tender.summary = await this.aiService.summarizeTender(tender);
-                tender.department = await this.aiService.categorizeTender(tender);
-                tender.keywords = await this.aiService.extractKeywords(tender);
-                tender.priority = await this.aiService.assessTenderPriority(tender);
-
                 tenders.push(tender);
             }
         }

@@ -22,7 +22,7 @@ The KMRL Tender & Technology Tracking System is a comprehensive solution designe
 - **Project Monitoring**: Tracks ongoing construction projects, rail lines, and maintenance workflows
 - **Progress Visualization**: Displays project progress with milestone tracking
 - **Approval Management**: Shows pending approvals, document requirements, and deadlines
-- **Risk Assessment**: Identifies potential bottlenecks and provides AI-assisted suggestions for workflow improvements
+- **Risk Assessment**: Identifies potential bottlenecks and provides suggestions for workflow improvements
 
 ### 4. Notifications
 - **Multi-channel Alerts**: Real-time notifications via dashboard popups, email, and mobile push notifications
@@ -204,7 +204,7 @@ For technical issues or feature requests, contact the KMRL IT department.
 1. Integration with external APIs for real-time data
 2. Advanced analytics and reporting capabilities
 3. Mobile application for on-the-go access
-4. AI-powered recommendation engine for tenders and technologies
+4. Enhanced recommendation engine for tenders and technologies
 5. Integration with project management tools
 
 ### Scalability Improvements
