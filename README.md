@@ -1,6 +1,6 @@
 # KMRL Document Management System
 
-A comprehensive web-based document management system built with HTML, CSS, and JavaScript. This system provides role-based access control, document upload and management, analytics, and AI-powered features for modern organizations.
+A comprehensive web-based document management system built with HTML, CSS, and JavaScript. This system provides role-based access control, document upload and management, analytics, and automation features for modern organizations.
 
 ## 🚀 Features
 
@@ -10,8 +10,7 @@ A comprehensive web-based document management system built with HTML, CSS, and J
 - **Document Management**: Search, filter, and organize documents efficiently
 - **Analytics Dashboard**: Visual insights and reporting with Chart.js
 - **Responsive Design**: Mobile-friendly interface that works on all devices
-- **AI Assistant**: Intelligent chat-based help system for comprehensive user support
-- **Real-time Assistance**: Context-aware AI guidance for all system operations
+- **Automation**: Streamlined workflows and intelligent processing
 
 ### User Roles & Permissions
 
@@ -40,9 +39,8 @@ This system has been enhanced with a backend architecture for automated tender t
 ### New Features
 - **Automated Portal Monitoring**: Scans government and private tender portals
 - **Real-time Notifications**: WebSocket-based instant alerts
-- **AI Integration**: Tender summarization and categorization
-- **AI Assistant**: Comprehensive intelligent help system for user guidance
-- **Document Intelligence**: AI-powered document analysis and categorization
+- **Workflow Automation**: Streamlined tender processing and categorization
+- **Document Intelligence**: Advanced document analysis and categorization
 - **Email Notifications**: SMTP-based email alerts
 - **Data Persistence**: MongoDB database storage
 - **RESTful API**: Backend services for frontend integration
@@ -60,7 +58,7 @@ KMRL2/
 │   ├── upload.js               # File upload handling
 │   ├── documents.js            # Document management
 │   ├── api-client.js           # API client for backend communication
-│   ├── ai-assistant.js         # Comprehensive AI assistant system
+│   ├── automation.js           # Workflow automation system
 │   └── ...                     # Other JavaScript files
 ├── models/                     # Mongoose models for MongoDB
 ├── services/                   # Backend services
@@ -72,7 +70,7 @@ KMRL2/
 ├── documents.html              # Document management
 ├── analytics.html              # Analytics and reporting
 ├── admin.html                  # Admin panel
-├── ai-demo.html                # AI Assistant demonstration page
+
 ├── server.js                   # Main backend server
 ├── README.md                   # This file
 └── README_BACKEND.md           # Backend architecture documentation
@@ -100,7 +98,6 @@ KMRL2/
 3. Configure environment variables in `.env`:
    - MongoDB connection string
    - SMTP settings for email notifications
-   - OpenAI API key for AI features
 4. Start the backend server:
    ```bash
    npm start
@@ -168,7 +165,7 @@ The system includes demo accounts for testing:
 1. The system automatically monitors tender portals
 2. Real-time notifications appear in the dashboard
 3. Email alerts are sent for high-priority tenders
-4. AI-enhanced tender summaries and categorization
+4. Enhanced tender summaries and automated categorization
 5. Historical tender data stored in MongoDB
 
 ## 🎨 Design System
@@ -200,7 +197,7 @@ The system includes demo accounts for testing:
 
 ### Dependencies
 - **Frontend**: Chart.js, Font Awesome
-- **Backend**: Express, Mongoose, Socket.IO, Nodemailer, OpenAI
+- **Backend**: Express, Mongoose, Socket.IO, Nodemailer
 - **Development**: Nodemon, Jest
 - **Web Scraping**: Axios, Cheerio
 
@@ -239,7 +236,7 @@ The system includes demo accounts for testing:
 ### Tender Tracking Engine
 - **Portal Monitoring**: Automated scanning of tender portals
 - **Real-time Notifications**: Instant alerts via WebSockets
-- **AI Enhancement**: Intelligent tender processing
+- **Workflow Enhancement**: Intelligent tender processing
 - **Email Alerts**: SMTP-based notification system
 - **Data Persistence**: MongoDB database storage
 
@@ -260,6 +257,5 @@ The system includes demo accounts for testing:
 
 For detailed information about the backend architecture, see:
 - [README_BACKEND.md](README_BACKEND.md) - Backend architecture documentation
-- [README_AI_ASSISTANT.md](README_AI_ASSISTANT.md) - AI Assistant integration guide
 - [SYSTEM_INTEGRATION_GUIDE.md](SYSTEM_INTEGRATION_GUIDE.md) - Integration guide
 - [SYSTEM_VALIDATION_GUIDE.md](SYSTEM_VALIDATION_GUIDE.md) - Validation guide

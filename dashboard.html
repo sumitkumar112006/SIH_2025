@@ -402,10 +402,7 @@
                     <i class="fas fa-folder"></i>
                     <span>My Documents</span>
                 </a>
-                <a href="#" class="nav-link" onclick="window.aiAssistant && window.aiAssistant.open(); return false;">
-                    <i class="fas fa-robot"></i>
-                    <span>AI Assistant</span>
-                </a>
+
                 <a href="analytics.html" class="nav-link">
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
@@ -535,10 +532,7 @@
                         <i class="fas fa-chart-line"></i>
                         <div>View Analytics</div>
                     </a>
-                    <a href="#" class="action-card" onclick="window.aiAssistant && window.aiAssistant.open(); return false;">
-                        <i class="fas fa-robot"></i>
-                        <div>AI Assistant</div>
-                    </a>
+
                 </div>
             </div>
 
@@ -552,34 +546,13 @@
         </main>
     </div>
 
-    <!-- Chatbot Component (Hidden by default) -->
-    <div id="chatbot" class="chatbot" style="display: none;">
-        <div class="chatbot-header">
-            <h4><i class="fas fa-robot"></i> AI Assistant</h4>
-            <button class="chatbot-close" onclick="closeChatbot()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="chatbot-messages" id="chatbotMessages">
-            <div class="message bot-message">
-                <i class="fas fa-robot"></i>
-                <span>Hello! I'm your AI assistant. How can I help you with document management today?</span>
-            </div>
-        </div>
-        <div class="chatbot-input">
-            <input type="text" id="chatbotInput" placeholder="Type your message...">
-            <button onclick="sendMessage()">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
+
 
     <!-- Scripts -->
     <script src="js/authorization.js"></script>
     <script src="js/common.js"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/openai-client.js"></script>
-    <script src="js/ai-assistant-interface.js"></script>
+    
     <script src="js/staff.js"></script>
 </body>
 
