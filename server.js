@@ -11,6 +11,7 @@ const Portal = require('./models/Portal');
 const User = require('./models/User');
 const PortalMonitor = require('./services/monitor');
 const AIController = require('./services/ai/AIController');
+const EnhancedAIController = require('./services/ai/EnhancedAIController');
 
 // Load environment variables
 dotenv.config();
@@ -53,8 +54,9 @@ const transporter = nodemailer.createTransport({
 // Initialize portal monitor
 const portalMonitor = new PortalMonitor();
 
-// Initialize AI controller
+// Initialize AI controllers
 const aiController = new AIController();
+const enhancedAIController = new EnhancedAIController();
 
 // API Routes
 app.get('/api/tenders', async (req, res) => {
@@ -181,6 +183,38 @@ app.get('/api/ai/usage-insights', aiController.getUsageInsights.bind(aiControlle
 
 // Batch Processing
 app.post('/api/ai/process-batch', aiController.processDocumentBatch.bind(aiController));
+
+// 🚀 Enhanced AI Routes with OpenRouter Integration
+// Enhanced Document Understanding
+app.post('/api/ai/enhanced/extract-analyze', enhancedAIController.extractAndAnalyzeDocument.bind(enhancedAIController));
+app.post('/api/ai/enhanced/detect-translate', enhancedAIController.detectAndTranslate.bind(enhancedAIController));
+app.post('/api/ai/enhanced/classify', enhancedAIController.classifyDocument.bind(enhancedAIController));
+app.post('/api/ai/enhanced/extract-entities', enhancedAIController.extractEntities.bind(enhancedAIController));
+
+// Enhanced Summarization & Analysis
+app.post('/api/ai/enhanced/summarize', enhancedAIController.summarizeDocument.bind(enhancedAIController));
+app.post('/api/ai/enhanced/action-points', enhancedAIController.extractActionPoints.bind(enhancedAIController));
+app.post('/api/ai/enhanced/compliance', enhancedAIController.analyzeCompliance.bind(enhancedAIController));
+app.post('/api/ai/enhanced/quality-assessment', enhancedAIController.assessDocumentQuality.bind(enhancedAIController));
+
+// Enhanced Q&A and Search
+app.post('/api/ai/enhanced/question-answer', enhancedAIController.answerDocumentQuestion.bind(enhancedAIController));
+app.post('/api/ai/enhanced/search-query', enhancedAIController.generateSearchQuery.bind(enhancedAIController));
+
+// Enhanced Batch Processing
+app.post('/api/ai/enhanced/process-batch', enhancedAIController.processDocumentBatch.bind(enhancedAIController));
+
+// System Management
+app.get('/api/ai/enhanced/models', enhancedAIController.getAvailableModels.bind(enhancedAIController));
+app.post('/api/ai/enhanced/switch-model', enhancedAIController.switchModel.bind(enhancedAIController));
+app.post('/api/ai/enhanced/reset-openai', enhancedAIController.resetToOpenAI.bind(enhancedAIController));
+app.post('/api/ai/enhanced/toggle-service', enhancedAIController.toggleAIService.bind(enhancedAIController));
+app.get('/api/ai/enhanced/health', enhancedAIController.healthCheck.bind(enhancedAIController));
+
+// Backward compatibility routes
+app.post('/api/ai/enhanced/compare-versions', enhancedAIController.compareVersions.bind(enhancedAIController));
+app.post('/api/ai/enhanced/highlight-compliance', enhancedAIController.highlightCompliance.bind(enhancedAIController));
+app.post('/api/ai/enhanced/extract-key-value', enhancedAIController.extractKeyValuePairs.bind(enhancedAIController));
 
 // WebSocket connection
 io.on('connection', (socket) => {

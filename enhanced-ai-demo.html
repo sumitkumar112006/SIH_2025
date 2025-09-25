@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced AI Assistant - KMRL Document System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Enhanced AI Assistant Styles */
+        .enhanced-ai-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 450px;
+            height: 650px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            z-index: 10000;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .enhanced-ai-panel.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .enhanced-ai-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .enhanced-ai-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .enhanced-ai-header-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .enhanced-ai-header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .enhanced-ai-header-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .enhanced-ai-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .enhanced-ai-status {
+            padding: 0.75rem 1.5rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.85rem;
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .status-main {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .fix-openai-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .fix-openai-btn:hover {
+            background: #5856eb;
+            transform: translateY(-1px);
+        }
+        
+        .fix-openai-btn i {
+            font-size: 0.75rem;
+        }
+
+        .enhanced-ai-controls {
+            padding: 1rem 1.5rem;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .enhanced-ai-controls select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .enhanced-ai-features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .enhanced-ai-feature-btn {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .enhanced-ai-feature-btn:hover {
+            background: #f3f4f6;
+            border-color: #6366f1;
+            transform: translateY(-1px);
+        }
+
+        .enhanced-ai-feature-btn i {
+            font-size: 1rem;
+            color: #6366f1;
+        }
+
+        .enhanced-ai-chat {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .enhanced-ai-welcome {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .enhanced-ai-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .enhanced-ai-welcome h3 {
+            margin: 0 0 0.5rem 0;
+            color: #1f2937;
+        }
+
+        .capabilities-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .capability-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .capability-item i {
+            color: #6366f1;
+        }
+
+        .enhanced-ai-message {
+            max-width: 85%;
+            padding: 1rem;
+            border-radius: 1rem;
+            position: relative;
+        }
+
+        .enhanced-ai-message.user {
+            align-self: flex-end;
+            background: #6366f1;
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .enhanced-ai-message.ai {
+            align-self: flex-start;
+            background: #f1f5f9;
+            color: #1f2937;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .enhanced-ai-message.system {
+            align-self: center;
+            background: #dbeafe;
+            color: #1e40af;
+            font-size: 0.85rem;
+            max-width: 70%;
+        }
+
+        .enhanced-ai-message.thinking {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .enhanced-ai-message-content {
+            word-wrap: break-word;
+        }
+
+        .enhanced-ai-message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .thinking-dots span {
+            width: 6px;
+            height: 6px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: thinking 1.4s infinite ease-in-out;
+        }
+
+        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes thinking {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .enhanced-ai-input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .enhanced-ai-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem;
+            resize: none;
+            max-height: 80px;
+            font-family: inherit;
+        }
+
+        .enhanced-ai-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .enhanced-ai-send-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .enhanced-ai-send-btn:hover {
+            background: #5856eb;
+            transform: scale(1.05);
+        }
+
+        .enhanced-ai-send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .enhanced-ai-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+
+        .enhanced-ai-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Demo content styles */
+        .demo-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .demo-header h1 {
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .demo-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .demo-feature {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .demo-feature h3 {
+            color: #6366f1;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-instructions {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            border-left: 4px solid #6366f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🤖 Enhanced AI Assistant Demo - OpenAI Priority</h1>
+            <p><strong>Experience the power of OpenAI models (GPT-4, GPT-3.5) integrated through OpenRouter</strong></p>
+            <div style="background: #dbeafe; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; border-left: 4px solid #3b82f6;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #1e40af;"><i class="fas fa-info-circle"></i> OpenAI First Priority</h3>
+                <p style="margin: 0; color: #1e40af;">This system prioritizes OpenAI models for the best AI experience. If OpenAI has issues, it automatically falls back to other models while showing you fix options.</p>
+            </div>
+        </div>
+
+        <div class="demo-instructions">
+            <h3><i class="fas fa-robot"></i> How to Use - OpenAI Priority System</h3>
+            <ol>
+                <li><strong>🤖 OpenAI First</strong> - System automatically uses OpenAI models (GPT-4o-mini, GPT-4o, GPT-3.5-turbo)</li>
+                <li><strong>Click the AI button</strong> in the bottom-right corner to open the assistant</li>
+                <li><strong>Check status</strong> - Green means OpenAI is working, yellow means using fallback</li>
+                <li><strong>Fix issues</strong> - If you see "Fix OpenAI" button, click it to restore OpenAI functionality</li>
+                <li><strong>Upload or select a document</strong> from the dropdown</li>
+                <li><strong>Choose a feature</strong> like Smart Summary, Translation, or Compliance Analysis</li>
+                <li><strong>Ask questions</strong> about your documents in natural language</li>
+                <li><strong>Get intelligent insights</strong> powered by OpenAI's advanced language models</li>
+            </ol>
+            <div style="background: #f0f9ff; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                <strong>💡 Pro Tip:</strong> If OpenAI services are temporarily unavailable, the system automatically switches to backup models while continuously trying to restore OpenAI functionality.
+            </div>
+        </div>
+
+        <div class="demo-features">
+            <div class="demo-feature">
+                <h3><i class="fas fa-brain"></i> Advanced Document Analysis</h3>
+                <p>Get comprehensive summaries, extract key information, and understand document structure with AI-powered analysis that goes beyond simple keyword matching.</p>
+            </div>
+
+            <div class="demo-feature">
+                <h3><i class="fas fa-language"></i> Professional Translation</h3>
+                <p>Translate between English and Malayalam with context awareness, preserving technical terms and maintaining professional tone suitable for government documents.</p>
+            </div>
+
+            <div class="demo-feature">
+                <h3><i class="fas fa-question-circle"></i> Intelligent Q&A</h3>
+                <p>Ask specific questions about your documents and get accurate, contextual answers. Perfect for quickly finding information without reading entire documents.</p>
+            </div>
+
+            <div class="demo-feature">
+                <h3><i class="fas fa-shield-check"></i> Compliance Analysis</h3>
+                <p>Automatically identify regulatory requirements, compliance gaps, and risk factors in your documents with specialized analysis for government and technical documents.</p>
+            </div>
+
+            <div class="demo-feature">
+                <h3><i class="fas fa-star"></i> Quality Assessment</h3>
+                <p>Get detailed quality assessments of your documents with specific suggestions for improvement, completeness checks, and professional formatting recommendations.</p>
+            </div>
+
+            <div class="demo-feature">
+                <h3><i class="fas fa-tasks"></i> Action Item Extraction</h3>
+                <p>Automatically identify tasks, deadlines, and action items from meeting minutes, project documents, and reports with priority levels and assignment details.</p>
+            </div>
+            
+            <div class="demo-feature">
+                <h3><i class="fas fa-robot"></i> OpenAI Priority System</h3>
+                <p><strong>Automatic OpenAI model selection</strong> with fallback protection. Uses GPT-4o-mini (primary), GPT-4o (complex tasks), and GPT-3.5-turbo (fallback) for the most reliable AI experience.</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 3rem 0;">
+            <p><strong>🤖 Powered by OpenAI through OpenRouter</strong> - GPT-4o, GPT-4o-mini, GPT-3.5-turbo</p>
+            <p><em>Click the AI button to get started with OpenAI-powered document analysis!</em></p>
+            <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem; margin: 1rem auto; max-width: 600px;">
+                <strong>⚠️ Notice:</strong> If you see connection issues, use the "Fix OpenAI" button in the assistant to restore full functionality.
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced AI Assistant Toggle Button -->
+    <button id="enhancedAIToggle" class="enhanced-ai-toggle" title="Open Enhanced AI Assistant">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <!-- Enhanced AI Assistant Panel -->
+    <div id="enhancedAIPanel" class="enhanced-ai-panel">
+        <div class="enhanced-ai-header">
+            <h3>
+                <i class="fas fa-robot"></i>
+                Enhanced AI Assistant
+            </h3>
+            <div class="enhanced-ai-header-controls">
+                <button id="enhancedAIClear" class="enhanced-ai-header-btn" title="Clear History">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button id="enhancedAIClose" class="enhanced-ai-header-btn" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="enhanced-ai-content">
+            <div id="enhancedAIStatus" class="enhanced-ai-status">
+                <div class="service-status">
+                    <i class="fas fa-circle"></i>
+                    <span>Initializing...</span>
+                </div>
+            </div>
+
+            <div class="enhanced-ai-controls">
+                <select id="enhancedDocSelect">
+                    <option value="">Select a document to analyze</option>
+                </select>
+                
+                <div id="enhancedAIFeatures" class="enhanced-ai-features">
+                    <!-- Feature buttons will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div id="enhancedAIChat" class="enhanced-ai-chat">
+                <!-- Conversation will be populated by JavaScript -->
+            </div>
+
+            <div class="enhanced-ai-input-area">
+                <textarea 
+                    id="enhancedAIInput" 
+                    class="enhanced-ai-input" 
+                    placeholder="Ask me about your documents or choose a feature above..."
+                    rows="2"
+                ></textarea>
+                <button id="enhancedAISend" class="enhanced-ai-send-btn" title="Send Message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/enhanced-ai-assistant.js"></script>
+    <script>
+        // Demo document data for testing
+        const demoDocuments = [
+            {
+                id: 'demo-1',
+                title: 'Metro Line 2 Construction Contract',
+                category: 'TECHNICAL',
+                content: 'This document outlines the construction requirements for Metro Line 2 extension from Aluva to Kakkanad. The project timeline is 24 months with completion deadline of December 2025. Total budget allocated is ₹850 crores. Safety protocols must be followed as per IS:4014 standards. Environmental clearance required from Kerala State Pollution Control Board. Contractor must submit weekly progress reports. Project manager: Rajesh Kumar. Key milestones include foundation work by March 2024, civil works by September 2024, and track laying by June 2025.',
+                uploadedBy: 'Project Manager',
+                department: 'Engineering'
+            },
+            {
+                id: 'demo-2',
+                title: 'Staff Training Policy Update',
+                category: 'HR',
+                content: 'KMRL announces mandatory safety training for all operational staff effective January 2024. Training program duration: 40 hours. Completion deadline: March 31, 2024. Training topics include emergency procedures, customer service protocols, and equipment handling. All staff must achieve minimum 80% score in final assessment. Non-compliance may result in suspension. Training coordinator: Priya Nair. Sessions will be conducted at KMRL Training Center, Muttom. Contact HR department for scheduling.',
+                uploadedBy: 'HR Manager',
+                department: 'Human Resources'
+            },
+            {
+                id: 'demo-3',
+                title: 'Environmental Impact Assessment Report',
+                category: 'REGULATORY',
+                content: 'Environmental Impact Assessment for Kochi Metro Phase 2 expansion. Study period: 6 months. Key findings: Minimal impact on local flora and fauna. Air quality improvement expected due to reduced vehicular traffic. Noise levels during construction will exceed 65dB in residential areas. Mitigation measures required: sound barriers, restricted working hours (8 AM to 6 PM), dust control systems. Compliance with Environmental (Protection) Act, 1986 mandatory. Public hearing scheduled for February 15, 2024. Report submitted to Ministry of Environment and Forests.',
+                uploadedBy: 'Environmental Officer',
+                department: 'Planning'
+            }
+        ];
+
+        // Store demo documents in localStorage for the AI assistant
+        localStorage.setItem('kmrl_documents', JSON.stringify(demoDocuments));
+
+        // Store demo user data
+        localStorage.setItem('kmrl_user', JSON.stringify({
+            id: 'demo-user',
+            name: 'Demo User',
+            role: 'admin',
+            department: 'All'
+        }));
+
+        console.log('Demo data loaded successfully');
+    </script>
+</body>
+</html>
